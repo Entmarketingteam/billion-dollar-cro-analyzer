@@ -1,6 +1,11 @@
 /** @jest-environment node */
 import { describe, it, expect, beforeEach, afterEach, jest } from "@jest/globals";
 
+// Mock environment variables FIRST
+process.env.NEXT_PUBLIC_SUPABASE_URL = "https://fake.supabase.co";
+process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = "fake-anon-key";
+process.env.SUPABASE_SERVICE_ROLE_KEY = "fake-service-key";
+
 // Mock dependencies BEFORE importing the route
 jest.mock("@/lib/db", () => ({
   getTestRun: jest.fn(),
