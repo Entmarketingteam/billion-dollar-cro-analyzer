@@ -187,7 +187,7 @@ const AUDIT_CHECKLIST: AuditChecklistDef[] = [
     label: "Page loads in < 3 seconds",
     check: async (page) => {
       const metrics = await page.evaluate(() => {
-        const perfData = performance.getEntriesByType("navigation")[0];
+        const perfData = performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming;
         return (perfData?.loadEventEnd || 0) - (perfData?.fetchStart || 0);
       });
       return metrics < 3000;
@@ -199,7 +199,7 @@ const AUDIT_CHECKLIST: AuditChecklistDef[] = [
     check: async (page) => {
       const lcp = await page.evaluate(() => {
         const entries = performance.getEntriesByType("largest-contentful-paint");
-        return entries[entries.length - 1]?.startTime || 0;
+        return (entries[entries.length - 1]?.startTime || 0) as number;
       });
       return lcp < 2500;
     },
