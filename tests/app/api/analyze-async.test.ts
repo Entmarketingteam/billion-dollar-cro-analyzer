@@ -84,7 +84,7 @@ describe("POST /api/analyze-async", () => {
     // Response should return immediately (202) without waiting for runAnalysisJob
     expect(response.status).toBe(202);
     // runAnalysisJob is called but not awaited
-    expect(runAnalysisJob).toHaveBeenCalledWith("tr-456");
+    expect(runAnalysisJobMock).toHaveBeenCalledWith("tr-456");
   });
 
   it("returns 400 when siteId is missing", async () => {
