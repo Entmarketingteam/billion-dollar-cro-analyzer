@@ -58,7 +58,7 @@ describe("POST /api/analyze-async", () => {
 
   it("calls createTestRun with the provided siteId", async () => {
     const mockTestRun = { id: "tr-123", site_id: "site-789" };
-    createTestRun.mockResolvedValueOnce(mockTestRun);
+    createTestRunMock.mockResolvedValueOnce(mockTestRun);
 
     const req = {
       json: async () => ({ siteId: "site-789" }),
@@ -72,7 +72,7 @@ describe("POST /api/analyze-async", () => {
 
   it("fire-and-forget runAnalysisJob (does not await)", async () => {
     const mockTestRun = { id: "tr-456" };
-    createTestRun.mockResolvedValueOnce(mockTestRun);
+    createTestRunMock.mockResolvedValueOnce(mockTestRun);
     runAnalysisJob.mockResolvedValueOnce(undefined);
 
     const req = {
@@ -137,7 +137,7 @@ describe("POST /api/analyze-async", () => {
 
   it("handles runAnalysisJob errors gracefully (fire-and-forget)", async () => {
     const mockTestRun = { id: "tr-789" };
-    createTestRun.mockResolvedValueOnce(mockTestRun);
+    createTestRunMock.mockResolvedValueOnce(mockTestRun);
     const mockError = new Error("Analysis failed");
     runAnalysisJob.mockRejectedValueOnce(mockError);
 
@@ -154,7 +154,7 @@ describe("POST /api/analyze-async", () => {
 
   it("returns JSON response with correct content-type", async () => {
     const mockTestRun = { id: "tr-123" };
-    createTestRun.mockResolvedValueOnce(mockTestRun);
+    createTestRunMock.mockResolvedValueOnce(mockTestRun);
 
     const req = {
       json: async () => ({ siteId: "site-456" }),
@@ -167,7 +167,7 @@ describe("POST /api/analyze-async", () => {
 
   it("accepts siteId in request body", async () => {
     const mockTestRun = { id: "tr-123", site_id: "my-custom-site-id" };
-    createTestRun.mockResolvedValueOnce(mockTestRun);
+    createTestRunMock.mockResolvedValueOnce(mockTestRun);
 
     const req = {
       json: async () => ({ siteId: "my-custom-site-id" }),
