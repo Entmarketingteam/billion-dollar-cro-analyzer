@@ -62,6 +62,13 @@ export interface ChecklistItem {
   screenshot_url: string | null;
 }
 
+export interface ResultVerification {
+  verified: boolean;
+  confidence: number;
+  issues: string[];
+  verifiedAt: string;
+}
+
 export interface AuditResult {
   id: string;
   site_id: string;
