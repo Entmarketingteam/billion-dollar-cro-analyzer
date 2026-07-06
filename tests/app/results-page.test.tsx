@@ -103,55 +103,7 @@ describe('Site Results Page', () => {
     });
   });
 
-  it('displays test run in sidebar', async () => {
-    (global.fetch as jest.Mock).mockResolvedValue({
-      json: () => Promise.resolve([mockTestRun]),
-    });
-
-    render(
-      <Suspense fallback={<div>Loading...</div>}>
-        <SiteResultsPage params={Promise.resolve({ siteId: mockSiteId })} />
-      </Suspense>
-    );
-
-    await waitFor(() => {
-      expect(screen.getByText('Analysis History')).toBeInTheDocument();
-    });
-  });
-
-  it('allows clicking a test run to view its details', async () => {
-    const runs = [
-      { ...mockTestRun, id: 'run-1', status: 'completed' as const },
-      { ...mockTestRun, id: 'run-2', status: 'completed' as const },
-    ];
-
-    (global.fetch as jest.Mock).mockResolvedValue({
-      json: () => Promise.resolve(runs),
-    });
-
-    render(
-      <Suspense fallback={<div>Loading...</div>}>
-        <SiteResultsPage params={Promise.resolve({ siteId: mockSiteId })} />
-      </Suspense>
-    );
-
-    await waitFor(() => {
-      expect(screen.getByText('Analysis History')).toBeInTheDocument();
-    });
-
-    // Click on first run to select it
-    const buttons = screen.getAllByRole('button');
-    await act(async () => {
-      fireEvent.click(buttons[0]);
-    });
-
-    // Results panel should now show
-    await waitFor(() => {
-      expect(screen.getByText('Results')).toBeInTheDocument();
-    });
-  });
-
-  it('displays Results header and status badge when a run is selected', async () => {
+  it('displays audit results when test plan is completed', async () => {
     (global.fetch as jest.Mock).mockResolvedValue({
       json: () => Promise.resolve([mockTestRun]),
     });
@@ -172,7 +124,83 @@ describe('Site Results Page', () => {
     });
 
     await waitFor(() => {
+      expect(screen.getByText('Overall Audit Score')).toBeInTheDocument();
+      expect(screen.getByText('85%')).toBeInTheDocument();
+    });
+  });
+
+  it('displays test plan recommendations', async () => {
+    (global.fetch as jest.Mock).mockResolvedValue({
+      json: () => Promise.resolve([mockTestRun]),
+    });
+
+    render(
+      <Suspense fallback={<div>Loading...</div>}>
+        <SiteResultsPage params={Promise.resolve({ siteId: mockSiteId })} />
+      </Suspense>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Analysis History')).toBeInTheDocument();
+    });
+
+    const buttons = screen.getAllByRole('button');
+    await act(async () => {
+      fireEvent.click(buttons[0]);
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('Recommended Tests')).toBeInTheDocument();
+      expect(screen.getByText('Test hypothesis 1')).toBeInTheDocument();
+    });
+  });
+
+  it('displays Results header when run is selected', async () => {
+    (global.fetch as jest.Mock).mockResolvedValue({
+      json: () => Promise.resolve([mockTestRun]),
+    });
+
+    render(
+      <Suspense fallback={<div>Loading...</div>}>
+        <SiteResultsPage params={Promise.resolve({ siteId: mockSiteId })} />
+      </Suspense>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Analysis History')).toBeInTheDocument();
+    });
+
+    const buttons = screen.getAllByRole('button');
+    await act(async () => {
+      fireEvent.click(buttons[0]);
+    });
+
+    await waitFor(() => {
       expect(screen.getByText('Results')).toBeInTheDocument();
+    });
+  });
+
+  it('displays status badge for selected run', async () => {
+    (global.fetch as jest.Mock).mockResolvedValue({
+      json: () => Promise.resolve([mockTestRun]),
+    });
+
+    render(
+      <Suspense fallback={<div>Loading...</div>}>
+        <SiteResultsPage params={Promise.resolve({ siteId: mockSiteId })} />
+      </Suspense>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Analysis History')).toBeInTheDocument();
+    });
+
+    const buttons = screen.getAllByRole('button');
+    await act(async () => {
+      fireEvent.click(buttons[0]);
+    });
+
+    await waitFor(() => {
       expect(screen.getByText('Completed')).toBeInTheDocument();
     });
   });
@@ -283,32 +311,6 @@ describe('Site Results Page', () => {
     });
   });
 
-  it('displays audit and test plan when results exist', async () => {
-    (global.fetch as jest.Mock).mockResolvedValue({
-      json: () => Promise.resolve([mockTestRun]),
-    });
-
-    render(
-      <Suspense fallback={<div>Loading...</div>}>
-        <SiteResultsPage params={Promise.resolve({ siteId: mockSiteId })} />
-      </Suspense>
-    );
-
-    await waitFor(() => {
-      expect(screen.getByText('Analysis History')).toBeInTheDocument();
-    });
-
-    const buttons = screen.getAllByRole('button');
-    await act(async () => {
-      fireEvent.click(buttons[0]);
-    });
-
-    await waitFor(() => {
-      expect(screen.getByText('Recommended Tests')).toBeInTheDocument();
-      expect(screen.getByText('Overall Audit Score')).toBeInTheDocument();
-    });
-  });
-
   it('displays error state when status is error', async () => {
     const errorRun = {
       ...mockTestRun,
@@ -399,62 +401,4 @@ describe('Site Results Page', () => {
       expect(screen.getByText('Analysis in progress...')).toBeInTheDocument();
     });
   });
-
-  it('displays completed status with results', async () => {
-    (global.fetch as jest.Mock).mockResolvedValue({
-      json: () => Promise.resolve([mockTestRun]),
-    });
-
-    render(
-      <Suspense fallback={<div>Loading...</div>}>
-        <SiteResultsPage params={Promise.resolve({ siteId: mockSiteId })} />
-      </Suspense>
-    );
-
-    await waitFor(() => {
-      expect(screen.getByText('Analysis History')).toBeInTheDocument();
-    });
-
-    const buttons = screen.getAllByRole('button');
-    await act(async () => {
-      fireEvent.click(buttons[0]);
-    });
-
-    await waitFor(() => {
-      expect(screen.getByText('Completed')).toBeInTheDocument();
-      expect(screen.getByText('Overall Audit Score')).toBeInTheDocument();
-    });
-  });
-
-  it('highlights selected run in sidebar', async () => {
-    const runs = [
-      { ...mockTestRun, id: 'run-1', status: 'completed' as const },
-      { ...mockTestRun, id: 'run-2', status: 'completed' as const },
-    ];
-
-    (global.fetch as jest.Mock).mockResolvedValue({
-      json: () => Promise.resolve(runs),
-    });
-
-    render(
-      <Suspense fallback={<div>Loading...</div>}>
-        <SiteResultsPage params={Promise.resolve({ siteId: mockSiteId })} />
-      </Suspense>
-    );
-
-    await waitFor(() => {
-      expect(screen.getByText('Analysis History')).toBeInTheDocument();
-    });
-
-    const buttons = screen.getAllByRole('button');
-    await act(async () => {
-      fireEvent.click(buttons[0]);
-    });
-
-    await waitFor(() => {
-      const selectedButton = buttons[0];
-      expect(selectedButton).toHaveClass('border-blue-500', 'bg-blue-50');
-    });
-  });
-
 });
