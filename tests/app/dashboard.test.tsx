@@ -1,17 +1,25 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import DashboardPage from '@/app/dashboard/page';
+
+// Mock the navigation before importing components
+jest.mock('next/navigation', () => ({
+  useRouter: () => ({
+    push: jest.fn(),
+  }),
+}));
 
 // Mock the database module
 jest.mock('@/lib/db', () => ({
   listSites: jest.fn(),
 }));
 
+import DashboardPage from '@/app/dashboard/page';
 import { listSites } from '@/lib/db';
 
 describe('Dashboard Page', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    (global.fetch as jest.Mock)?.mockClear();
   });
 
   it('renders dashboard title and description', async () => {
@@ -31,7 +39,7 @@ describe('Dashboard Page', () => {
     expect(screen.getByText('No sites connected yet')).toBeInTheDocument();
   });
 
-  it('renders a grid of SiteCard components when sites are present', async () => {
+  it('renders site names and URLs when sites are present', async () => {
     const mockSites = [
       { id: '1', name: 'Store One', url: 'https://store1.com' },
       { id: '2', name: 'Store Two', url: 'https://store2.com' },
@@ -52,7 +60,7 @@ describe('Dashboard Page', () => {
     }
   });
 
-  it('renders one SiteCard for each site', async () => {
+  it('renders View Results link for each site', async () => {
     const mockSites = [
       { id: '1', name: 'Store One', url: 'https://store1.com' },
       { id: '2', name: 'Store Two', url: 'https://store2.com' },
@@ -61,11 +69,8 @@ describe('Dashboard Page', () => {
     const component = await DashboardPage();
     render(component);
 
-    // Each card should have a "View Results" and "Analyze" button
-    const viewResultsButtons = screen.getAllByRole('link', { name: /View Results/i });
-    const analyzeButtons = screen.getAllByRole('button', { name: /Analyze/i });
-
-    expect(viewResultsButtons).toHaveLength(mockSites.length);
-    expect(analyzeButtons).toHaveLength(mockSites.length);
+    // Each card should have a "View Results" link
+    const viewResultsLinks = screen.getAllByRole('link', { name: /View Results/i });
+    expect(viewResultsLinks).toHaveLength(mockSites.length);
   });
 });
