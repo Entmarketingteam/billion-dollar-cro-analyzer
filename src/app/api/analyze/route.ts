@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
     // ── 4. Run Playwright audit ──────────────────────────────
 
     const auditResult = await runPlaywrightAudit(site.url);
-    auditResult.site_id = siteId;
+    const passedChecks = auditResult.checklist_items.filter((c) => c.passed).length;
 
     // ── 5. Save test plan to Supabase ────────────────────────
 
@@ -111,11 +111,20 @@ export async function POST(request: NextRequest) {
 
     // ── 6. Save audit result to Supabase ─────────────────────
 
+    const checklistItems = auditResult.checklist_items.map((item, i) => ({
+      id: `check_${i}`,
+      category: item.category,
+      label: item.label,
+      passed: item.passed,
+      notes: item.details ?? null,
+      screenshot_url: null,
+    }));
+
     const { error: auditError } = await db.from("audit_results").insert({
       site_id: siteId,
-      checklist_items: auditResult.checklist_items,
-      total_checks: auditResult.total_checks,
-      passed_checks: auditResult.passed_checks,
+      checklist_items: checklistItems,
+      total_checks: checklistItems.length,
+      passed_checks: passedChecks,
       score_pct: auditResult.score_pct,
     });
 

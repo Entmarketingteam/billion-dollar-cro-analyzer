@@ -1,4 +1,10 @@
-import type { TestPlanAnalysis, AuditResult } from "@/types";
+import type { TestPlanAnalysis } from "@/types";
+import type { AuditCheckItem } from "./playwright-real";
+
+interface AuditResultInput {
+  checklist_items: AuditCheckItem[];
+  score_pct: number;
+}
 
 const AIRTABLE_API_TOKEN = process.env.AIRTABLE_API_TOKEN || "";
 const AIRTABLE_BASE_ID = process.env.AIRTABLE_BASE_ID || "";
@@ -16,7 +22,7 @@ export async function syncAnalysisToAirtable(
   siteName: string,
   siteUrl: string,
   analysis: TestPlanAnalysis,
-  auditResult: AuditResult
+  auditResult: AuditResultInput
 ): Promise<void> {
   if (!AIRTABLE_API_TOKEN || !AIRTABLE_BASE_ID) {
     console.warn("Airtable not configured; skipping sync");
@@ -37,8 +43,8 @@ export async function syncAnalysisToAirtable(
         "Generated At": analysis.generated_at,
         Model: analysis.model,
         "Audit Score": auditResult.score_pct,
-        "Total Checks": auditResult.total_checks,
-        "Passed Checks": auditResult.passed_checks,
+        "Total Checks": auditResult.checklist_items.length,
+        "Passed Checks": auditResult.checklist_items.filter((c) => c.passed).length,
       }
     );
 
@@ -66,10 +72,10 @@ export async function syncAnalysisToAirtable(
     await createAirtableRecord(AIRTABLE_AUDIT_RESULTS_TABLE, {
       "Analysis ID": [analysisRecord.id], // Link to parent
       "Score %": auditResult.score_pct,
-      "Passed Checks": auditResult.passed_checks,
-      "Total Checks": auditResult.total_checks,
+      "Passed Checks": auditResult.checklist_items.filter((c) => c.passed).length,
+      "Total Checks": auditResult.checklist_items.length,
       "Checklist Items": auditItemsSummary,
-      "Created At": auditResult.created_at,
+      "Created At": new Date().toISOString(),
     });
 
     console.log(
