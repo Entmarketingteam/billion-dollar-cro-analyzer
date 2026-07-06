@@ -103,7 +103,7 @@ describe('Site Results Page', () => {
     });
   });
 
-  it('displays analysis history in sidebar', async () => {
+  it('displays test run in sidebar', async () => {
     (global.fetch as jest.Mock).mockResolvedValue({
       json: () => Promise.resolve([mockTestRun]),
     });
@@ -119,23 +119,7 @@ describe('Site Results Page', () => {
     });
   });
 
-  it('displays test run in sidebar with creation date', async () => {
-    (global.fetch as jest.Mock).mockResolvedValue({
-      json: () => Promise.resolve([mockTestRun]),
-    });
-
-    render(
-      <Suspense fallback={<div>Loading...</div>}>
-        <SiteResultsPage params={Promise.resolve({ siteId: mockSiteId })} />
-      </Suspense>
-    );
-
-    await waitFor(() => {
-      expect(screen.getByText(/Analysis History/i)).toBeInTheDocument();
-    });
-  });
-
-  it('selects first test run by default or requires click', async () => {
+  it('allows clicking a test run to view its details', async () => {
     const runs = [
       { ...mockTestRun, id: 'run-1', status: 'completed' as const },
       { ...mockTestRun, id: 'run-2', status: 'completed' as const },
@@ -157,38 +141,17 @@ describe('Site Results Page', () => {
 
     // Click on first run to select it
     const buttons = screen.getAllByRole('button');
-    const firstRunButton = buttons[0];
-    fireEvent.click(firstRunButton);
-
-    await waitFor(() => {
-      expect(screen.getByText(/Results/i)).toBeInTheDocument();
-    });
-  });
-
-  it('displays Results header when a run is selected', async () => {
-    (global.fetch as jest.Mock).mockResolvedValue({
-      json: () => Promise.resolve([mockTestRun]),
+    await act(async () => {
+      fireEvent.click(buttons[0]);
     });
 
-    render(
-      <Suspense fallback={<div>Loading...</div>}>
-        <SiteResultsPage params={Promise.resolve({ siteId: mockSiteId })} />
-      </Suspense>
-    );
-
-    await waitFor(() => {
-      const buttons = screen.getAllByRole('button');
-      if (buttons.length > 0) {
-        fireEvent.click(buttons[0]);
-      }
-    });
-
+    // Results panel should now show
     await waitFor(() => {
       expect(screen.getByText('Results')).toBeInTheDocument();
     });
   });
 
-  it('displays status badge for selected run', async () => {
+  it('displays Results header and status badge when a run is selected', async () => {
     (global.fetch as jest.Mock).mockResolvedValue({
       json: () => Promise.resolve([mockTestRun]),
     });
@@ -200,13 +163,16 @@ describe('Site Results Page', () => {
     );
 
     await waitFor(() => {
-      const buttons = screen.getAllByRole('button');
-      if (buttons.length > 0) {
-        fireEvent.click(buttons[0]);
-      }
+      expect(screen.getByText('Analysis History')).toBeInTheDocument();
+    });
+
+    const buttons = screen.getAllByRole('button');
+    await act(async () => {
+      fireEvent.click(buttons[0]);
     });
 
     await waitFor(() => {
+      expect(screen.getByText('Results')).toBeInTheDocument();
       expect(screen.getByText('Completed')).toBeInTheDocument();
     });
   });
@@ -223,10 +189,12 @@ describe('Site Results Page', () => {
     );
 
     await waitFor(() => {
-      const buttons = screen.getAllByRole('button');
-      if (buttons.length > 0) {
-        fireEvent.click(buttons[0]);
-      }
+      expect(screen.getByText('Analysis History')).toBeInTheDocument();
+    });
+
+    const buttons = screen.getAllByRole('button');
+    await act(async () => {
+      fireEvent.click(buttons[0]);
     });
 
     await waitFor(() => {
@@ -235,7 +203,7 @@ describe('Site Results Page', () => {
     });
   });
 
-  it('displays unverified state with warning icon', async () => {
+  it('displays unverified state with confidence percentage', async () => {
     const unverifiedRun = {
       ...mockTestRun,
       results: {
@@ -260,10 +228,12 @@ describe('Site Results Page', () => {
     );
 
     await waitFor(() => {
-      const buttons = screen.getAllByRole('button');
-      if (buttons.length > 0) {
-        fireEvent.click(buttons[0]);
-      }
+      expect(screen.getByText('Analysis History')).toBeInTheDocument();
+    });
+
+    const buttons = screen.getAllByRole('button');
+    await act(async () => {
+      fireEvent.click(buttons[0]);
     });
 
     await waitFor(() => {
@@ -297,10 +267,12 @@ describe('Site Results Page', () => {
     );
 
     await waitFor(() => {
-      const buttons = screen.getAllByRole('button');
-      if (buttons.length > 0) {
-        fireEvent.click(buttons[0]);
-      }
+      expect(screen.getByText('Analysis History')).toBeInTheDocument();
+    });
+
+    const buttons = screen.getAllByRole('button');
+    await act(async () => {
+      fireEvent.click(buttons[0]);
     });
 
     await waitFor(() => {
@@ -323,10 +295,12 @@ describe('Site Results Page', () => {
     );
 
     await waitFor(() => {
-      const buttons = screen.getAllByRole('button');
-      if (buttons.length > 0) {
-        fireEvent.click(buttons[0]);
-      }
+      expect(screen.getByText('Analysis History')).toBeInTheDocument();
+    });
+
+    const buttons = screen.getAllByRole('button');
+    await act(async () => {
+      fireEvent.click(buttons[0]);
     });
 
     await waitFor(() => {
@@ -353,10 +327,12 @@ describe('Site Results Page', () => {
     );
 
     await waitFor(() => {
-      const buttons = screen.getAllByRole('button');
-      if (buttons.length > 0) {
-        fireEvent.click(buttons[0]);
-      }
+      expect(screen.getByText('Analysis History')).toBeInTheDocument();
+    });
+
+    const buttons = screen.getAllByRole('button');
+    await act(async () => {
+      fireEvent.click(buttons[0]);
     });
 
     await waitFor(() => {
@@ -381,10 +357,12 @@ describe('Site Results Page', () => {
     );
 
     await waitFor(() => {
-      const buttons = screen.getAllByRole('button');
-      if (buttons.length > 0) {
-        fireEvent.click(buttons[0]);
-      }
+      expect(screen.getByText('Analysis History')).toBeInTheDocument();
+    });
+
+    const buttons = screen.getAllByRole('button');
+    await act(async () => {
+      fireEvent.click(buttons[0]);
     });
 
     await waitFor(() => {
