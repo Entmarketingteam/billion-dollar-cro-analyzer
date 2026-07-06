@@ -107,7 +107,7 @@ export default function SiteResultsPage({ params }: { params: Promise<{ siteId: 
                 <>
                   {/* Verification Badge */}
                   {selectedRun.results.verification && (
-                    <div className={`p-4 rounded-lg mb-6 border-2 ${
+                    <div data-testid="verification-badge" className={`p-4 rounded-lg mb-6 border-2 ${
                       selectedRun.results.verification.verified
                         ? 'bg-green-50 border-green-200'
                         : 'bg-yellow-50 border-yellow-200'
