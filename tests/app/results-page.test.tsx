@@ -1,5 +1,5 @@
 import React, { Suspense } from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import SiteResultsPage from '@/app/dashboard/[siteId]/page';
 import type { TestRun } from '@/types';
 
@@ -70,24 +70,20 @@ describe('Site Results Page', () => {
     jest.useRealTimers();
   });
 
-  it('displays loading state initially', async () => {
+  it('renders results page with test runs', async () => {
     (global.fetch as jest.Mock).mockResolvedValue({
       json: () => Promise.resolve([mockTestRun]),
     });
 
     render(
-      <Suspense fallback={<div>Suspending...</div>}>
+      <Suspense fallback={<div>Loading...</div>}>
         <SiteResultsPage params={Promise.resolve({ siteId: mockSiteId })} />
       </Suspense>
     );
 
-    // Initially should show loading or suspense
+    // Wait for Suspense to resolve
     await waitFor(() => {
-      const loadingText = screen.queryByText(/Loading|Suspending/i);
-      // The page either shows loading or displays content
-      expect(
-        loadingText || screen.queryByText(/Analysis History/i)
-      ).toBeInTheDocument();
+      expect(screen.getByText('Analysis History')).toBeInTheDocument();
     });
   });
 
