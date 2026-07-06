@@ -73,7 +73,7 @@ describe("POST /api/analyze-async", () => {
   it("fire-and-forget runAnalysisJob (does not await)", async () => {
     const mockTestRun = { id: "tr-456" };
     createTestRunMock.mockResolvedValueOnce(mockTestRun);
-    runAnalysisJob.mockResolvedValueOnce(undefined);
+    runAnalysisJobMock.mockResolvedValueOnce(undefined);
 
     const req = {
       json: async () => ({ siteId: "site-123" }),
