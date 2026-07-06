@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
 
     const { data: snapshot, error: insertError } = await supabase
       .from("metrics_snapshots")
-      .insert({ site_id: siteId, metrics })
+      .insert({ site_id: siteId, metrics: metrics as MetricsData })
       .select()
       .single();
 
