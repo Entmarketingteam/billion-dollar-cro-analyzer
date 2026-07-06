@@ -18,7 +18,8 @@ export interface Database {
     Tables: {
       sites: Table<
         Site,
-        Omit<Site, "id" | "created_at" | "updated_at">,
+        Omit<Site, "id" | "created_at" | "updated_at" | "ga4_property_id" | "ga4_refresh_token"> &
+          Partial<Pick<Site, "ga4_property_id" | "ga4_refresh_token">>,
         Partial<Omit<Site, "id" | "created_at" | "updated_at">>
       >;
       test_plans: Table<
