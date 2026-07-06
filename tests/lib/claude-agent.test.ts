@@ -455,7 +455,9 @@ describe("claude-agent.ts", () => {
         deviceBreakdown: { desktop: 1500, mobile: 900, tablet: 100 },
       });
 
+      // Either an ID was provided or generated (non-empty string)
       expect(result.tests[0].id).toBeDefined();
+      expect(typeof result.tests[0].id).toBe("string");
       expect(result.tests[0].id.length).toBeGreaterThan(0);
     });
   });
