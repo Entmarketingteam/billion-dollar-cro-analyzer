@@ -21,6 +21,7 @@
   "devDependencies": {
     "@jest/globals": "^29.7.0",
     "@tailwindcss/postcss": "^4",
+    "@types/jest": "^30.0.0",
     "@types/node": "^22",
     "@types/react": "^19",
     "@types/react-dom": "^19",
