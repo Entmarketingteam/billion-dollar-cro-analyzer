@@ -113,18 +113,18 @@ export async function updateTestRunStatus(
   errorMessage?: string
 ): Promise<TestRun> {
   const supabase = createServerClient();
-  const update: Record<string, unknown> = {
-    status,
-    updated_at: new Date().toISOString(),
-  };
-  if (results !== undefined) update.results = results;
-  if (errorMessage !== undefined) update.error_message = errorMessage;
-  if (status === "completed" || status === "error") {
-    update.completed_at = new Date().toISOString();
-  }
+  const completedAt = (status === "completed" || status === "error")
+    ? new Date().toISOString()
+    : undefined;
   const { data, error } = await supabase
     .from("test_runs")
-    .update(update)
+    .update({
+      status,
+      updated_at: new Date().toISOString(),
+      ...(results !== undefined && { results }),
+      ...(errorMessage !== undefined && { error_message: errorMessage }),
+      ...(completedAt !== undefined && { completed_at: completedAt }),
+    })
     .eq("id", testRunId)
     .select()
     .single();
