@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { refreshGA4Token, fetchGA4Metrics } from "@/lib/ga4";
 import { createServerClient } from "@/lib/db";
 import { getUserFromCookie } from "@/lib/auth";
+import type { MetricsData } from "@/types";
 
 export async function POST(request: NextRequest) {
   const { siteId } = await request.json();
