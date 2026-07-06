@@ -1,5 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
-import type { Site, TestPlan, AuditResult, MetricsSnapshot } from "@/types";
+import type { Site, TestPlan, AuditResult, MetricsSnapshot, TestRun, TestRunStatus } from "@/types";
 
 // ── Database schema type map ─────────────────────────────────
 
