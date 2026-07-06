@@ -126,7 +126,7 @@ describe("POST /api/analyze-async", () => {
 
   it("propagates createTestRun errors (no try/catch)", async () => {
     const mockError = new Error("Database connection failed");
-    createTestRun.mockRejectedValueOnce(mockError);
+    createTestRunMock.mockRejectedValueOnce(mockError);
 
     const req = {
       json: async () => ({ siteId: "site-123" }),
