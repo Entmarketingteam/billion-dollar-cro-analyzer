@@ -131,13 +131,16 @@ export default function SiteResultsPage({ params }: { params: Promise<{ siteId: 
                               : 'Verification Note'}
                           </span>
                         </div>
-                        <span className={`text-2xl font-bold ${
-                          selectedRun.results.verification.confidence >= 75
-                            ? 'text-green-600'
-                            : selectedRun.results.verification.confidence >= 50
-                            ? 'text-yellow-600'
-                            : 'text-red-600'
-                        }`}>
+                        <span
+                          data-testid="confidence-score"
+                          className={`text-2xl font-bold ${
+                            selectedRun.results.verification.confidence >= 75
+                              ? 'text-green-600'
+                              : selectedRun.results.verification.confidence >= 50
+                              ? 'text-yellow-600'
+                              : 'text-red-600'
+                          }`}
+                        >
                           {selectedRun.results.verification.confidence}%
                         </span>
                       </div>
