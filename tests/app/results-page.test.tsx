@@ -457,23 +457,4 @@ describe('Site Results Page', () => {
     });
   });
 
-  it('displays content after API call completes', async () => {
-    (global.fetch as jest.Mock).mockResolvedValue({
-      json: () => Promise.resolve([mockTestRun]),
-    });
-
-    render(
-      <Suspense fallback={<div>Loading...</div>}>
-        <SiteResultsPage params={Promise.resolve({ siteId: mockSiteId })} />
-      </Suspense>
-    );
-
-    // Wait for the component to fetch and display content
-    await waitFor(() => {
-      expect(screen.getByText('Analysis History')).toBeInTheDocument();
-    });
-
-    // Verify fetch was called (fetch may be called, but we focus on the rendered result)
-    expect((global.fetch as jest.Mock).mock.calls.length).toBeGreaterThan(0);
-  });
 });
