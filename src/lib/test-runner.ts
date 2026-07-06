@@ -17,7 +17,6 @@ export async function runAnalysisJob(testRunId: string): Promise<void> {
     const results = {
       audit_result: auditResult,
       test_plan: { tests: testPlan.tests, generated_at: new Date().toISOString() },
-      metrics: {},
     };
 
     await updateTestRunStatus(testRunId, 'completed', results);
