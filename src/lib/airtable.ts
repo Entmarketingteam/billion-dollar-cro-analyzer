@@ -144,3 +144,24 @@ export async function getAllAnalysesFromAirtable(
     return [];
   }
 }
+
+// Best-effort sync for a completed test run. Logs a warning if Airtable is not configured.
+export async function syncToAirtable(
+  testRunId: string,
+  results: {
+    test_plan?: { tests: Array<any>; generated_at: string };
+    audit_result?: { checklist_items: Array<any>; score_pct: number };
+    metrics?: { conversion_rate: number; aov: number; sessions: number };
+  } | null
+): Promise<void> {
+  if (!AIRTABLE_API_TOKEN || !AIRTABLE_BASE_ID) {
+    console.warn("Airtable not configured; skipping sync");
+    return;
+  }
+  await createAirtableRecord("TestRuns", {
+    "Test Run ID": testRunId,
+    "Audit Score": results?.audit_result?.score_pct ?? null,
+    "Tests Found": results?.test_plan?.tests?.length ?? null,
+    "Synced At": new Date().toISOString(),
+  });
+}
