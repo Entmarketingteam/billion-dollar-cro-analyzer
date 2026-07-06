@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@/lib/db";
-import { generateTestPlan } from "@/lib/claude-agent";
+import { generateTestPlanFromMetrics as generateTestPlan } from "@/lib/claude-agent";
 import { runPlaywrightAudit } from "@/lib/playwright-audit";
 import { syncAnalysisToAirtable } from "@/lib/airtable";
 import { fetchShopifyMetrics } from "@/lib/shopify";
