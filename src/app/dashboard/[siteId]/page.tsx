@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { use, useEffect, useRef, useState } from 'react';
 import type { TestRun } from '@/types';
 import StatusBadge from '@/components/StatusBadge';
 import AuditDisplay from '@/components/AuditDisplay';
