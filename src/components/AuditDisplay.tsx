@@ -11,7 +11,7 @@ export default function AuditDisplay({ auditResult }: { auditResult: any }) {
   }
 
   return (
-    <div className="space-y-4">
+    <div data-testid="audit-display" className="space-y-4">
       <div className="text-center">
         <p className="text-4xl font-bold text-gray-900">{auditResult.score_pct}%</p>
         <p className="text-gray-600 text-sm">Overall Audit Score</p>
@@ -22,12 +22,18 @@ export default function AuditDisplay({ auditResult }: { auditResult: any }) {
           <h4 className="font-semibold text-gray-900 mb-2">{category}</h4>
           <ul className="space-y-2">
             {items.map((check: any) => (
-              <li key={check.id} className="flex items-start gap-3">
-                <span className={`font-bold ${check.passed ? 'text-green-500' : 'text-red-500'}`}>
+              <li key={check.id} data-testid="audit-item" className="flex items-start gap-3">
+                <span
+                  data-testid="audit-item-status"
+                  data-passed={check.passed}
+                  className={`font-bold ${check.passed ? 'text-green-500' : 'text-red-500'}`}
+                >
                   {check.passed ? '✓' : '✗'}
                 </span>
                 <div>
-                  <p className="text-sm text-gray-900">{check.label}</p>
+                  <p data-testid="audit-item-name" className="text-sm text-gray-900">
+                    {check.label}
+                  </p>
                   {check.notes && (
                     <p className="text-xs text-gray-500">{check.notes}</p>
                   )}
