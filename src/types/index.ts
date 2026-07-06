@@ -97,3 +97,23 @@ export interface MetricsSnapshot {
   metrics: MetricsData;
   created_at: string;
 }
+
+// ── Test run tracking ────────────────────────────────────────
+
+export type TestRunStatus = 'pending' | 'running' | 'completed' | 'error';
+
+export interface TestRun {
+  id: string;
+  site_id: string;
+  status: TestRunStatus;
+  started_at: string;
+  completed_at: string | null;
+  error_message: string | null;
+  results: {
+    test_plan?: { tests: Array<any>; generated_at: string };
+    audit_result?: { checklist_items: Array<any>; score_pct: number };
+    metrics?: { conversion_rate: number; aov: number; sessions: number };
+  } | null;
+  created_at: string;
+  updated_at: string;
+}
