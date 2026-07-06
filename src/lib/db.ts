@@ -16,30 +16,26 @@ type Table<Row, Ins, Upd> = {
 export interface Database {
   public: {
     Tables: {
-      sites: {
-        Row: Site;
-        Insert: Omit<Site, "id" | "created_at" | "updated_at">;
-        Update: Partial<Omit<Site, "id" | "created_at" | "updated_at">>;
-        Relationships: [];
-      };
-      test_plans: {
-        Row: TestPlan;
-        Insert: Omit<TestPlan, "id" | "created_at">;
-        Update: Partial<Omit<TestPlan, "id" | "created_at">>;
-        Relationships: [];
-      };
-      audit_results: {
-        Row: AuditResult;
-        Insert: Omit<AuditResult, "id" | "created_at">;
-        Update: Partial<Omit<AuditResult, "id" | "created_at">>;
-        Relationships: [];
-      };
-      metrics_snapshots: {
-        Row: MetricsSnapshot;
-        Insert: Omit<MetricsSnapshot, "id" | "created_at">;
-        Update: Partial<Omit<MetricsSnapshot, "id" | "created_at">>;
-        Relationships: [];
-      };
+      sites: Table<
+        Site,
+        Omit<Site, "id" | "created_at" | "updated_at">,
+        Partial<Omit<Site, "id" | "created_at" | "updated_at">>
+      >;
+      test_plans: Table<
+        TestPlan,
+        Omit<TestPlan, "id" | "created_at">,
+        Partial<Omit<TestPlan, "id" | "created_at">>
+      >;
+      audit_results: Table<
+        AuditResult,
+        Omit<AuditResult, "id" | "created_at">,
+        Partial<Omit<AuditResult, "id" | "created_at">>
+      >;
+      metrics_snapshots: Table<
+        MetricsSnapshot,
+        Omit<MetricsSnapshot, "id" | "created_at">,
+        Partial<Omit<MetricsSnapshot, "id" | "created_at">>
+      >;
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
