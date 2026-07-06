@@ -14,6 +14,8 @@ export interface Site {
   url: string;
   shopify_domain: string | null;
   shopify_access_token: string | null;
+  ga4_property_id: string | null;
+  ga4_refresh_token: string | null;
   industry: string | null;
   created_at: string;
   updated_at: string;
