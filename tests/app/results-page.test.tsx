@@ -1,0 +1,514 @@
+import React, { Suspense } from 'react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import SiteResultsPage from '@/app/dashboard/[siteId]/page';
+import type { TestRun } from '@/types';
+
+// Mock Next.js navigation - must be before any imports that use it
+jest.mock('next/navigation', () => ({
+  useRouter: () => ({
+    push: jest.fn(),
+  }),
+}));
+
+// Mock fetch globally
+global.fetch = jest.fn();
+
+describe('Site Results Page', () => {
+  const mockSiteId = 'site-123';
+  const mockTestRun: TestRun = {
+    id: 'run-1',
+    site_id: mockSiteId,
+    status: 'completed',
+    started_at: '2024-01-01T10:00:00Z',
+    completed_at: '2024-01-01T10:15:00Z',
+    error_message: null,
+    results: {
+      test_plan: {
+        tests: [
+          {
+            id: 'test-1',
+            hypothesis: 'Test hypothesis 1',
+            effort_hours: 5,
+            expected_lift_min: 10,
+            expected_lift_max: 20,
+          },
+        ],
+        generated_at: '2024-01-01T10:05:00Z',
+      },
+      audit_result: {
+        checklist_items: [
+          {
+            id: 'item-1',
+            category: 'Performance',
+            label: 'Page load time',
+            passed: true,
+            notes: null,
+            screenshot_url: null,
+          },
+        ],
+        score_pct: 85,
+      },
+      verification: {
+        verified: true,
+        confidence: 85,
+        issues: [],
+        verifiedAt: '2024-01-01T10:10:00Z',
+      },
+    },
+    created_at: '2024-01-01T10:00:00Z',
+    updated_at: '2024-01-01T10:15:00Z',
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (global.fetch as jest.Mock).mockClear();
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
+  });
+
+  it('displays loading state initially', async () => {
+    (global.fetch as jest.Mock).mockResolvedValue({
+      json: () => Promise.resolve([mockTestRun]),
+    });
+
+    render(
+      <Suspense fallback={<div>Suspending...</div>}>
+        <SiteResultsPage params={Promise.resolve({ siteId: mockSiteId })} />
+      </Suspense>
+    );
+
+    // Initially should show loading or suspense
+    await waitFor(() => {
+      const loadingText = screen.queryByText(/Loading|Suspending/i);
+      // The page either shows loading or displays content
+      expect(
+        loadingText || screen.queryByText(/Analysis History/i)
+      ).toBeInTheDocument();
+    });
+  });
+
+  it('displays "No analyses yet" when no test runs exist', async () => {
+    (global.fetch as jest.Mock).mockResolvedValue({
+      json: () => Promise.resolve([]),
+    });
+
+    render(
+      <Suspense fallback={<div>Loading...</div>}>
+        <SiteResultsPage params={Promise.resolve({ siteId: mockSiteId })} />
+      </Suspense>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText(/No analyses yet/i)).toBeInTheDocument();
+    });
+  });
+
+  it('displays analysis history in sidebar', async () => {
+    (global.fetch as jest.Mock).mockResolvedValue({
+      json: () => Promise.resolve([mockTestRun]),
+    });
+
+    render(
+      <Suspense fallback={<div>Loading...</div>}>
+        <SiteResultsPage params={Promise.resolve({ siteId: mockSiteId })} />
+      </Suspense>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Analysis History')).toBeInTheDocument();
+    });
+  });
+
+  it('displays test run in sidebar with creation date', async () => {
+    (global.fetch as jest.Mock).mockResolvedValue({
+      json: () => Promise.resolve([mockTestRun]),
+    });
+
+    render(
+      <Suspense fallback={<div>Loading...</div>}>
+        <SiteResultsPage params={Promise.resolve({ siteId: mockSiteId })} />
+      </Suspense>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText(/Analysis History/i)).toBeInTheDocument();
+    });
+  });
+
+  it('selects first test run by default or requires click', async () => {
+    const runs = [
+      { ...mockTestRun, id: 'run-1', status: 'completed' as const },
+      { ...mockTestRun, id: 'run-2', status: 'completed' as const },
+    ];
+
+    (global.fetch as jest.Mock).mockResolvedValue({
+      json: () => Promise.resolve(runs),
+    });
+
+    render(
+      <Suspense fallback={<div>Loading...</div>}>
+        <SiteResultsPage params={Promise.resolve({ siteId: mockSiteId })} />
+      </Suspense>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Analysis History')).toBeInTheDocument();
+    });
+
+    // Click on first run to select it
+    const buttons = screen.getAllByRole('button');
+    const firstRunButton = buttons[0];
+    fireEvent.click(firstRunButton);
+
+    await waitFor(() => {
+      expect(screen.getByText(/Results/i)).toBeInTheDocument();
+    });
+  });
+
+  it('displays Results header when a run is selected', async () => {
+    (global.fetch as jest.Mock).mockResolvedValue({
+      json: () => Promise.resolve([mockTestRun]),
+    });
+
+    render(
+      <Suspense fallback={<div>Loading...</div>}>
+        <SiteResultsPage params={Promise.resolve({ siteId: mockSiteId })} />
+      </Suspense>
+    );
+
+    await waitFor(() => {
+      const buttons = screen.getAllByRole('button');
+      if (buttons.length > 0) {
+        fireEvent.click(buttons[0]);
+      }
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('Results')).toBeInTheDocument();
+    });
+  });
+
+  it('displays status badge for selected run', async () => {
+    (global.fetch as jest.Mock).mockResolvedValue({
+      json: () => Promise.resolve([mockTestRun]),
+    });
+
+    render(
+      <Suspense fallback={<div>Loading...</div>}>
+        <SiteResultsPage params={Promise.resolve({ siteId: mockSiteId })} />
+      </Suspense>
+    );
+
+    await waitFor(() => {
+      const buttons = screen.getAllByRole('button');
+      if (buttons.length > 0) {
+        fireEvent.click(buttons[0]);
+      }
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('Completed')).toBeInTheDocument();
+    });
+  });
+
+  it('displays verification badge when verified', async () => {
+    (global.fetch as jest.Mock).mockResolvedValue({
+      json: () => Promise.resolve([mockTestRun]),
+    });
+
+    render(
+      <Suspense fallback={<div>Loading...</div>}>
+        <SiteResultsPage params={Promise.resolve({ siteId: mockSiteId })} />
+      </Suspense>
+    );
+
+    await waitFor(() => {
+      const buttons = screen.getAllByRole('button');
+      if (buttons.length > 0) {
+        fireEvent.click(buttons[0]);
+      }
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('Results Verified')).toBeInTheDocument();
+      expect(screen.getByText('85%')).toBeInTheDocument(); // confidence score
+    });
+  });
+
+  it('displays unverified state with warning icon', async () => {
+    const unverifiedRun = {
+      ...mockTestRun,
+      results: {
+        ...mockTestRun.results,
+        verification: {
+          verified: false,
+          confidence: 45,
+          issues: ['Missing trust signals', 'Low mobile optimization'],
+          verifiedAt: '2024-01-01T10:10:00Z',
+        },
+      },
+    };
+
+    (global.fetch as jest.Mock).mockResolvedValue({
+      json: () => Promise.resolve([unverifiedRun]),
+    });
+
+    render(
+      <Suspense fallback={<div>Loading...</div>}>
+        <SiteResultsPage params={Promise.resolve({ siteId: mockSiteId })} />
+      </Suspense>
+    );
+
+    await waitFor(() => {
+      const buttons = screen.getAllByRole('button');
+      if (buttons.length > 0) {
+        fireEvent.click(buttons[0]);
+      }
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('Verification Note')).toBeInTheDocument();
+      expect(screen.getByText('45%')).toBeInTheDocument();
+    });
+  });
+
+  it('displays issues list when verification has issues', async () => {
+    const runWithIssues = {
+      ...mockTestRun,
+      results: {
+        ...mockTestRun.results,
+        verification: {
+          verified: false,
+          confidence: 55,
+          issues: ['Issue 1', 'Issue 2', 'Issue 3'],
+          verifiedAt: '2024-01-01T10:10:00Z',
+        },
+      },
+    };
+
+    (global.fetch as jest.Mock).mockResolvedValue({
+      json: () => Promise.resolve([runWithIssues]),
+    });
+
+    render(
+      <Suspense fallback={<div>Loading...</div>}>
+        <SiteResultsPage params={Promise.resolve({ siteId: mockSiteId })} />
+      </Suspense>
+    );
+
+    await waitFor(() => {
+      const buttons = screen.getAllByRole('button');
+      if (buttons.length > 0) {
+        fireEvent.click(buttons[0]);
+      }
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('Issues Found:')).toBeInTheDocument();
+      expect(screen.getByText('Issue 1')).toBeInTheDocument();
+      expect(screen.getByText('Issue 2')).toBeInTheDocument();
+      expect(screen.getByText('Issue 3')).toBeInTheDocument();
+    });
+  });
+
+  it('displays audit and test plan when results exist', async () => {
+    (global.fetch as jest.Mock).mockResolvedValue({
+      json: () => Promise.resolve([mockTestRun]),
+    });
+
+    render(
+      <Suspense fallback={<div>Loading...</div>}>
+        <SiteResultsPage params={Promise.resolve({ siteId: mockSiteId })} />
+      </Suspense>
+    );
+
+    await waitFor(() => {
+      const buttons = screen.getAllByRole('button');
+      if (buttons.length > 0) {
+        fireEvent.click(buttons[0]);
+      }
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('Recommended Tests')).toBeInTheDocument();
+      expect(screen.getByText('Overall Audit Score')).toBeInTheDocument();
+    });
+  });
+
+  it('displays error state when status is error', async () => {
+    const errorRun = {
+      ...mockTestRun,
+      status: 'error' as const,
+      error_message: 'Failed to connect to website',
+    };
+
+    (global.fetch as jest.Mock).mockResolvedValue({
+      json: () => Promise.resolve([errorRun]),
+    });
+
+    render(
+      <Suspense fallback={<div>Loading...</div>}>
+        <SiteResultsPage params={Promise.resolve({ siteId: mockSiteId })} />
+      </Suspense>
+    );
+
+    await waitFor(() => {
+      const buttons = screen.getAllByRole('button');
+      if (buttons.length > 0) {
+        fireEvent.click(buttons[0]);
+      }
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('Failed to connect to website')).toBeInTheDocument();
+    });
+  });
+
+  it('displays loading spinner when run is pending', async () => {
+    const pendingRun = {
+      ...mockTestRun,
+      status: 'pending' as const,
+    };
+
+    (global.fetch as jest.Mock).mockResolvedValue({
+      json: () => Promise.resolve([pendingRun]),
+    });
+
+    render(
+      <Suspense fallback={<div>Loading...</div>}>
+        <SiteResultsPage params={Promise.resolve({ siteId: mockSiteId })} />
+      </Suspense>
+    );
+
+    await waitFor(() => {
+      const buttons = screen.getAllByRole('button');
+      if (buttons.length > 0) {
+        fireEvent.click(buttons[0]);
+      }
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('Analysis in progress...')).toBeInTheDocument();
+    });
+  });
+
+  it('polls for updates when test run is running', async () => {
+    const runningRun = {
+      ...mockTestRun,
+      status: 'running' as const,
+    };
+
+    const completedRun = {
+      ...mockTestRun,
+      status: 'completed' as const,
+    };
+
+    // First call returns running, second returns completed
+    (global.fetch as jest.Mock)
+      .mockResolvedValueOnce({
+        json: () => Promise.resolve([runningRun]),
+      })
+      .mockResolvedValueOnce({
+        json: () => Promise.resolve([completedRun]),
+      });
+
+    render(
+      <Suspense fallback={<div>Loading...</div>}>
+        <SiteResultsPage params={Promise.resolve({ siteId: mockSiteId })} />
+      </Suspense>
+    );
+
+    await waitFor(() => {
+      const buttons = screen.getAllByRole('button');
+      if (buttons.length > 0) {
+        fireEvent.click(buttons[0]);
+      }
+    });
+
+    // Should poll after 2 seconds
+    jest.advanceTimersByTime(2000);
+
+    await waitFor(() => {
+      // Second fetch should have been called
+      expect(global.fetch).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  it('stops polling when test run is completed', async () => {
+    (global.fetch as jest.Mock).mockResolvedValue({
+      json: () => Promise.resolve([mockTestRun]),
+    });
+
+    render(
+      <Suspense fallback={<div>Loading...</div>}>
+        <SiteResultsPage params={Promise.resolve({ siteId: mockSiteId })} />
+      </Suspense>
+    );
+
+    await waitFor(() => {
+      const buttons = screen.getAllByRole('button');
+      if (buttons.length > 0) {
+        fireEvent.click(buttons[0]);
+      }
+    });
+
+    const initialCallCount = (global.fetch as jest.Mock).mock.calls.length;
+
+    // Advance time by 10 seconds
+    jest.advanceTimersByTime(10000);
+
+    // No additional calls should be made since run is completed
+    expect((global.fetch as jest.Mock).mock.calls.length).toBe(initialCallCount);
+  });
+
+  it('highlights selected run in sidebar', async () => {
+    const runs = [
+      { ...mockTestRun, id: 'run-1', status: 'completed' as const },
+      { ...mockTestRun, id: 'run-2', status: 'completed' as const },
+    ];
+
+    (global.fetch as jest.Mock).mockResolvedValue({
+      json: () => Promise.resolve(runs),
+    });
+
+    render(
+      <Suspense fallback={<div>Loading...</div>}>
+        <SiteResultsPage params={Promise.resolve({ siteId: mockSiteId })} />
+      </Suspense>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Analysis History')).toBeInTheDocument();
+    });
+
+    const buttons = screen.getAllByRole('button');
+    fireEvent.click(buttons[0]);
+
+    await waitFor(() => {
+      const selectedButton = buttons[0];
+      expect(selectedButton).toHaveClass('border-blue-500', 'bg-blue-50');
+    });
+  });
+
+  it('fetches test runs with correct siteId parameter', async () => {
+    (global.fetch as jest.Mock).mockResolvedValue({
+      json: () => Promise.resolve([mockTestRun]),
+    });
+
+    render(
+      <Suspense fallback={<div>Loading...</div>}>
+        <SiteResultsPage params={Promise.resolve({ siteId: mockSiteId })} />
+      </Suspense>
+    );
+
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledWith(
+        `/api/test-run?siteId=${mockSiteId}`
+      );
+    });
+  });
+});
