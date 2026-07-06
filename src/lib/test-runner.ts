@@ -40,7 +40,7 @@ export async function runAnalysisJob(testRunId: string): Promise<void> {
       `Analysis for ${site.name} completed successfully`,
       {
         'Audit Score': `${auditResult.score_pct}%`,
-        'Tests Found': `${testPlan.tests.length}`,
+        'Tests Found': `${testPlanFull.tests.length}`,
       }
     );
   } catch (error) {
