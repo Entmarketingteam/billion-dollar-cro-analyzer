@@ -6,8 +6,8 @@ import StatusBadge from '@/components/StatusBadge';
 import AuditDisplay from '@/components/AuditDisplay';
 import TestPlanDisplay from '@/components/TestPlanDisplay';
 
-export default function SiteResultsPage({ params }: { params: { siteId: string } }) {
-  const { siteId } = params;
+export default function SiteResultsPage({ params }: { params: Promise<{ siteId: string }> }) {
+  const { siteId } = use(params);
   const [runs, setRuns] = useState<TestRun[]>([]);
   const [selectedRun, setSelectedRun] = useState<TestRun | null>(null);
   const [loading, setLoading] = useState(true);
