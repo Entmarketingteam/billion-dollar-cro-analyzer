@@ -32,7 +32,7 @@ function getBenchmark(
   return BENCHMARKS[key] || BENCHMARKS.default;
 }
 
-export async function generateTestPlan(
+export async function generateTestPlanFromMetrics(
   input: AnalysisInput
 ): Promise<TestPlanAnalysis> {
   const benchmark = getBenchmark(input.industry);
