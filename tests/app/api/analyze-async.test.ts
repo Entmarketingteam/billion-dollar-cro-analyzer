@@ -97,7 +97,7 @@ describe("POST /api/analyze-async", () => {
 
     expect(response.status).toBe(400);
     expect(body.error).toBe("siteId required");
-    expect(createTestRun).not.toHaveBeenCalled();
+    expect(createTestRunMock).not.toHaveBeenCalled();
   });
 
   it("returns 400 when siteId is null", async () => {
