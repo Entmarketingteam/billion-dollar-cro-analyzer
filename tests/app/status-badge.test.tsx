@@ -42,7 +42,7 @@ describe('StatusBadge Component', () => {
     for (const status of statuses) {
       const { unmount } = render(<StatusBadge status={status} />);
 
-      const badge = screen.getByRole('img', { hidden: true })?.parentElement || screen.getByText(/Pending|Running|Completed|Error/);
+      const badge = screen.getByText(/Pending|Running|Completed|Error/);
       expect(badge).toHaveClass('inline-flex', 'items-center', 'px-2.5', 'py-0.5', 'rounded-full', 'text-xs', 'font-medium');
 
       unmount();
