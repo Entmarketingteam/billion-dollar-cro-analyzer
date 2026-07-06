@@ -31,7 +31,7 @@ export default function SiteCard({ site }: SiteCardProps) {
   }
 
   return (
-    <div className="bg-white p-6 rounded-lg border shadow-sm hover:shadow-md transition-shadow">
+    <div data-testid="site-card" data-site-id={site.id} className="bg-white p-6 rounded-lg border shadow-sm hover:shadow-md transition-shadow">
       <h3 className="font-semibold text-gray-900">{site.name}</h3>
       <p className="text-sm text-gray-500 truncate mt-1">{site.url}</p>
       <div className="flex gap-2 mt-4">
