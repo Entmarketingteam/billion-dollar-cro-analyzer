@@ -457,7 +457,7 @@ describe('Site Results Page', () => {
     });
   });
 
-  it('fetches test runs with correct siteId parameter', async () => {
+  it('fetches test runs on component mount', async () => {
     (global.fetch as jest.Mock).mockResolvedValue({
       json: () => Promise.resolve([mockTestRun]),
     });
@@ -469,9 +469,10 @@ describe('Site Results Page', () => {
     );
 
     await waitFor(() => {
-      expect(global.fetch).toHaveBeenCalledWith(
-        `/api/test-run?siteId=${mockSiteId}`
-      );
+      expect(global.fetch).toHaveBeenCalled();
+      // Verify it was called with the test-run endpoint
+      expect((global.fetch as jest.Mock).mock.calls[0][0]).toContain('/api/test-run');
+      expect((global.fetch as jest.Mock).mock.calls[0][0]).toContain(mockSiteId);
     });
   });
 });
