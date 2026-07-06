@@ -27,15 +27,15 @@ export default function RootLayout({
                 </span>
               </div>
               <nav className="flex items-center gap-6 text-sm font-medium text-gray-600">
-                <a href="/" className="hover:text-gray-900 transition-colors">
+                <Link href="/" className="hover:text-gray-900 transition-colors">
                   Home
-                </a>
-                <a
+                </Link>
+                <Link
                   href="/dashboard"
                   className="hover:text-gray-900 transition-colors"
                 >
                   Dashboard
-                </a>
+                </Link>
               </nav>
             </div>
           </div>
