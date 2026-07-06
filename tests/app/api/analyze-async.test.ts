@@ -6,25 +6,28 @@ process.env.NEXT_PUBLIC_SUPABASE_URL = "https://fake.supabase.co";
 process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = "fake-anon-key";
 process.env.SUPABASE_SERVICE_ROLE_KEY = "fake-service-key";
 
+// Create mock implementations before mocking
+const createTestRunMock = jest.fn();
+const runAnalysisJobMock = jest.fn();
+
 // Mock the database module BEFORE importing the route
 jest.mock("@/lib/db", () => ({
-  createTestRun: jest.fn(),
+  createTestRun: createTestRunMock,
   createServerClient: jest.fn(),
 }));
 
 // Mock the test runner module
 jest.mock("@/lib/test-runner", () => ({
-  runAnalysisJob: jest.fn(),
+  runAnalysisJob: runAnalysisJobMock,
 }));
 
 import { POST } from "@/app/api/analyze-async/route";
 
-const { createTestRun } = require("@/lib/db");
-const { runAnalysisJob } = require("@/lib/test-runner");
-
 describe("POST /api/analyze-async", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    createTestRunMock.mockClear();
+    runAnalysisJobMock.mockClear();
   });
 
   afterEach(() => {
