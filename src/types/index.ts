@@ -120,6 +120,7 @@ export interface TestRun {
     test_plan?: { tests: Array<any>; generated_at: string };
     audit_result?: { checklist_items: Array<any>; score_pct: number };
     metrics?: { conversion_rate: number; aov: number; sessions: number };
+    verification?: ResultVerification;
   } | null;
   created_at: string;
   updated_at: string;
