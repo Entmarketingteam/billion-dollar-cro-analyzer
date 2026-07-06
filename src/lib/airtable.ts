@@ -7,6 +7,7 @@ const AIRTABLE_TESTS_TABLE = "Tests";
 const AIRTABLE_AUDIT_RESULTS_TABLE = "AuditResults";
 
 interface AirtableRecord {
+  id: string;
   fields: Record<string, any>;
 }
 
