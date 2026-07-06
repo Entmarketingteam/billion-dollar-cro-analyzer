@@ -139,7 +139,7 @@ describe("POST /api/analyze-async", () => {
     const mockTestRun = { id: "tr-789" };
     createTestRunMock.mockResolvedValueOnce(mockTestRun);
     const mockError = new Error("Analysis failed");
-    runAnalysisJob.mockRejectedValueOnce(mockError);
+    runAnalysisJobMock.mockRejectedValueOnce(mockError);
 
     const req = {
       json: async () => ({ siteId: "site-123" }),
