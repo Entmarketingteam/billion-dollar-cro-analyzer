@@ -16,7 +16,11 @@ const statusLabels: Record<TestRunStatus, string> = {
 
 export default function StatusBadge({ status }: { status: TestRunStatus }) {
   return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusStyles[status]}`}>
+    <span
+      data-testid="status-badge"
+      data-status={status}
+      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusStyles[status]}`}
+    >
       {statusLabels[status]}
     </span>
   );
