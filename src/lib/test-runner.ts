@@ -20,6 +20,15 @@ export async function runAnalysisJob(testRunId: string): Promise<void> {
       test_plan: { tests: testPlan.tests, generated_at: new Date().toISOString() },
     };
 
+    // Run verification (non-blocking on error)
+    let verification;
+    try {
+      verification = await verifyAuditResults(auditResult, testPlan);
+      results.verification = verification;
+    } catch (verifyError) {
+      console.warn('Verification failed (non-critical):', verifyError);
+    }
+
     await updateTestRunStatus(testRunId, 'completed', results);
 
     await syncToAirtable(testRunId, results).catch((e) =>
