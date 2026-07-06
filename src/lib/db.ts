@@ -37,6 +37,12 @@ export interface Database {
         Omit<MetricsSnapshot, "id" | "created_at">,
         Partial<Omit<MetricsSnapshot, "id" | "created_at">>
       >;
+      test_runs: Table<
+        TestRun,
+        Omit<TestRun, "id" | "created_at" | "updated_at" | "started_at" | "completed_at" | "error_message" | "results"> &
+          Partial<Pick<TestRun, "completed_at" | "error_message" | "results">>,
+        Partial<Omit<TestRun, "id" | "created_at">>
+      >;
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
