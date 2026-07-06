@@ -1,14 +1,15 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import SiteCard from '@/components/SiteCard';
 
-// Mock Next.js navigation
+// Mock Next.js navigation BEFORE importing the component
 const mockPush = jest.fn();
 jest.mock('next/navigation', () => ({
   useRouter: () => ({
     push: mockPush,
   }),
 }));
+
+import SiteCard from '@/components/SiteCard';
 
 // Mock fetch globally
 global.fetch = jest.fn();
@@ -24,7 +25,7 @@ describe('SiteCard Component', () => {
     jest.clearAllMocks();
     (global.fetch as jest.Mock).mockClear();
     mockPush.mockClear();
-  });
+  })
 
   it('renders site name and URL', () => {
     render(<SiteCard site={mockSite} />);
