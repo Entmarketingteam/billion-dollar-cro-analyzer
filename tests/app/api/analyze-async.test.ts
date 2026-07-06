@@ -42,7 +42,7 @@ describe("POST /api/analyze-async", () => {
       created_at: new Date().toISOString(),
     };
 
-    createTestRun.mockResolvedValueOnce(mockTestRun);
+    createTestRunMock.mockResolvedValueOnce(mockTestRun);
 
     const req = {
       json: async () => ({ siteId: "site-456" }),
