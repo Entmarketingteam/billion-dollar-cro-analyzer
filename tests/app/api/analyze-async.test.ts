@@ -1,16 +1,18 @@
 /** @jest-environment node */
 import { describe, it, expect, beforeEach, afterEach, jest } from "@jest/globals";
-import { POST } from "@/app/api/analyze-async/route";
 
-// Mock the database module
+// Mock the database module BEFORE importing the route
 jest.mock("@/lib/db", () => ({
   createTestRun: jest.fn(),
+  createServerClient: jest.fn(),
 }));
 
 // Mock the test runner module
 jest.mock("@/lib/test-runner", () => ({
   runAnalysisJob: jest.fn(),
 }));
+
+import { POST } from "@/app/api/analyze-async/route";
 
 const { createTestRun } = require("@/lib/db");
 const { runAnalysisJob } = require("@/lib/test-runner");
