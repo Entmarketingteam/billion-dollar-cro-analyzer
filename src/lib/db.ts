@@ -154,3 +154,13 @@ export async function getSiteById(siteId: string) {
   if (error) throw error;
   return data;
 }
+
+export async function listSites() {
+  const supabase = createServerClient();
+  const { data, error } = await supabase
+    .from("sites")
+    .select("*")
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return data;
+}
