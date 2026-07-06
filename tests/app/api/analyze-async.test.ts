@@ -66,7 +66,7 @@ describe("POST /api/analyze-async", () => {
 
     await POST(req as any);
 
-    expect(createTestRun).toHaveBeenCalledWith("site-789");
+    expect(createTestRunMock).toHaveBeenCalledWith("site-789");
     expect(createTestRun).toHaveBeenCalledTimes(1);
   });
 
@@ -175,6 +175,6 @@ describe("POST /api/analyze-async", () => {
 
     await POST(req as any);
 
-    expect(createTestRun).toHaveBeenCalledWith("my-custom-site-id");
+    expect(createTestRunMock).toHaveBeenCalledWith("my-custom-site-id");
   });
 });
