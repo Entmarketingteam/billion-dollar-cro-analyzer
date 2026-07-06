@@ -81,3 +81,76 @@ export function createServerClient() {
 
 // Default export: browser client (safe for RSC / client components)
 export const db = createBrowserClient;
+
+// ── Test run helpers (server-side, service role) ─────────────
+
+export async function createTestRun(siteId: string): Promise<TestRun> {
+  const supabase = createServerClient();
+  const { data, error } = await supabase
+    .from("test_runs")
+    .insert({ site_id: siteId, status: "pending" as TestRunStatus })
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+export async function getTestRun(testRunId: string): Promise<TestRun> {
+  const supabase = createServerClient();
+  const { data, error } = await supabase
+    .from("test_runs")
+    .select()
+    .eq("id", testRunId)
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+export async function updateTestRunStatus(
+  testRunId: string,
+  status: TestRunStatus,
+  results?: TestRun["results"],
+  errorMessage?: string
+): Promise<TestRun> {
+  const supabase = createServerClient();
+  const update: Record<string, unknown> = {
+    status,
+    updated_at: new Date().toISOString(),
+  };
+  if (results !== undefined) update.results = results;
+  if (errorMessage !== undefined) update.error_message = errorMessage;
+  if (status === "completed" || status === "error") {
+    update.completed_at = new Date().toISOString();
+  }
+  const { data, error } = await supabase
+    .from("test_runs")
+    .update(update)
+    .eq("id", testRunId)
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+export async function listTestRunsBySite(siteId: string, limit = 10): Promise<TestRun[]> {
+  const supabase = createServerClient();
+  const { data, error } = await supabase
+    .from("test_runs")
+    .select()
+    .eq("site_id", siteId)
+    .order("created_at", { ascending: false })
+    .limit(limit);
+  if (error) throw error;
+  return data;
+}
+
+export async function getSiteById(siteId: string) {
+  const supabase = createServerClient();
+  const { data, error } = await supabase
+    .from("sites")
+    .select()
+    .eq("id", siteId)
+    .single();
+  if (error) throw error;
+  return data;
+}
