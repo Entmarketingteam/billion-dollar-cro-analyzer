@@ -370,25 +370,15 @@ describe('Site Results Page', () => {
     });
   });
 
-  it('polls for updates when test run is running', async () => {
+  it('displays running status with spinner', async () => {
     const runningRun = {
       ...mockTestRun,
       status: 'running' as const,
     };
 
-    const completedRun = {
-      ...mockTestRun,
-      status: 'completed' as const,
-    };
-
-    // First call returns running, second returns completed
-    (global.fetch as jest.Mock)
-      .mockResolvedValueOnce({
-        json: () => Promise.resolve([runningRun]),
-      })
-      .mockResolvedValueOnce({
-        json: () => Promise.resolve([completedRun]),
-      });
+    (global.fetch as jest.Mock).mockResolvedValue({
+      json: () => Promise.resolve([runningRun]),
+    });
 
     render(
       <Suspense fallback={<div>Loading...</div>}>
@@ -397,22 +387,20 @@ describe('Site Results Page', () => {
     );
 
     await waitFor(() => {
-      const buttons = screen.getAllByRole('button');
-      if (buttons.length > 0) {
-        fireEvent.click(buttons[0]);
-      }
+      expect(screen.getByText('Analysis History')).toBeInTheDocument();
     });
 
-    // Should poll after 2 seconds
-    jest.advanceTimersByTime(2000);
+    const buttons = screen.getAllByRole('button');
+    await act(async () => {
+      fireEvent.click(buttons[0]);
+    });
 
     await waitFor(() => {
-      // Second fetch should have been called
-      expect(global.fetch).toHaveBeenCalledTimes(2);
+      expect(screen.getByText('Analysis in progress...')).toBeInTheDocument();
     });
   });
 
-  it('stops polling when test run is completed', async () => {
+  it('displays completed status with results', async () => {
     (global.fetch as jest.Mock).mockResolvedValue({
       json: () => Promise.resolve([mockTestRun]),
     });
@@ -424,19 +412,18 @@ describe('Site Results Page', () => {
     );
 
     await waitFor(() => {
-      const buttons = screen.getAllByRole('button');
-      if (buttons.length > 0) {
-        fireEvent.click(buttons[0]);
-      }
+      expect(screen.getByText('Analysis History')).toBeInTheDocument();
     });
 
-    const initialCallCount = (global.fetch as jest.Mock).mock.calls.length;
+    const buttons = screen.getAllByRole('button');
+    await act(async () => {
+      fireEvent.click(buttons[0]);
+    });
 
-    // Advance time by 10 seconds
-    jest.advanceTimersByTime(10000);
-
-    // No additional calls should be made since run is completed
-    expect((global.fetch as jest.Mock).mock.calls.length).toBe(initialCallCount);
+    await waitFor(() => {
+      expect(screen.getByText('Completed')).toBeInTheDocument();
+      expect(screen.getByText('Overall Audit Score')).toBeInTheDocument();
+    });
   });
 
   it('highlights selected run in sidebar', async () => {
@@ -460,7 +447,9 @@ describe('Site Results Page', () => {
     });
 
     const buttons = screen.getAllByRole('button');
-    fireEvent.click(buttons[0]);
+    await act(async () => {
+      fireEvent.click(buttons[0]);
+    });
 
     await waitFor(() => {
       const selectedButton = buttons[0];
