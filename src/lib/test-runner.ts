@@ -3,6 +3,7 @@ import { performAudit } from './playwright-audit';
 import { generateTestPlan } from './claude-agent';
 import { syncToAirtable } from './airtable';
 import { notifySlack } from './slack';
+import { verifyAuditResults } from './verify-results';
 
 export async function runAnalysisJob(testRunId: string): Promise<void> {
   const testRun = await getTestRun(testRunId);
