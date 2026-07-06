@@ -15,16 +15,15 @@ export async function runAnalysisJob(testRunId: string): Promise<void> {
     const auditResult = await performAudit(site.url);
     const testPlanFull = await generateTestPlan(site);
 
-    const results = {
+    const results: any = {
       audit_result: auditResult,
       test_plan: { tests: testPlanFull.tests, generated_at: new Date().toISOString() },
     };
 
     // Run verification (non-blocking on error)
-    let verification;
     try {
       // Pass the full test plan analysis to verification
-      verification = await verifyAuditResults(auditResult, testPlanFull);
+      const verification = await verifyAuditResults(auditResult, testPlanFull);
       results.verification = verification;
     } catch (verifyError) {
       console.warn('Verification failed (non-critical):', verifyError);
