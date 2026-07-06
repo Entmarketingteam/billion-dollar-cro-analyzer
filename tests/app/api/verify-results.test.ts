@@ -1,8 +1,7 @@
 /** @jest-environment node */
 import { describe, it, expect, beforeEach, afterEach, jest } from "@jest/globals";
-import { POST } from "@/app/api/verify-results/route";
 
-// Mock dependencies
+// Mock dependencies BEFORE importing the route
 jest.mock("@/lib/db", () => ({
   getTestRun: jest.fn(),
   updateTestRunStatus: jest.fn(),
@@ -12,6 +11,8 @@ jest.mock("@/lib/db", () => ({
 jest.mock("@/lib/verify-results", () => ({
   verifyAuditResults: jest.fn(),
 }));
+
+import { POST } from "@/app/api/verify-results/route";
 
 const { getTestRun, updateTestRunStatus } = require("@/lib/db");
 const { verifyAuditResults } = require("@/lib/verify-results");
