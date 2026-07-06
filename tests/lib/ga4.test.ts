@@ -300,7 +300,7 @@ describe("ga4.ts", () => {
       expect(metrics.device_breakdown.desktop).toBe(5000);
       expect(metrics.device_breakdown.mobile).toBe(5000);
       expect(metrics.device_breakdown.tablet).toBe(0);
-      expect(metrics.conversion_rate).toBe(1); // (200 / 10000) * 100
+      expect(metrics.conversion_rate).toBe(2); // (200 / 10000) * 100
     });
 
     it("calculates AOV as revenue / transactions", async () => {
