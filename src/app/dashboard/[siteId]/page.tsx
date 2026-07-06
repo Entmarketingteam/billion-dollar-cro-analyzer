@@ -104,10 +104,64 @@ export default function SiteResultsPage({ params }: { params: Promise<{ siteId: 
 
               {/* Completed state */}
               {selectedRun.status === 'completed' && selectedRun.results && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <AuditDisplay auditResult={selectedRun.results.audit_result} />
-                  <TestPlanDisplay testPlan={selectedRun.results.test_plan} />
-                </div>
+                <>
+                  {/* Verification Badge */}
+                  {selectedRun.results.verification && (
+                    <div className={`p-4 rounded-lg mb-6 border-2 ${
+                      selectedRun.results.verification.verified
+                        ? 'bg-green-50 border-green-200'
+                        : 'bg-yellow-50 border-yellow-200'
+                    }`}>
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <span className={`text-lg font-bold ${
+                            selectedRun.results.verification.verified
+                              ? 'text-green-600'
+                              : 'text-yellow-600'
+                          }`}>
+                            {selectedRun.results.verification.verified ? '✓' : '⚠'}
+                          </span>
+                          <span className={`font-semibold ${
+                            selectedRun.results.verification.verified
+                              ? 'text-green-900'
+                              : 'text-yellow-900'
+                          }`}>
+                            {selectedRun.results.verification.verified
+                              ? 'Results Verified'
+                              : 'Verification Note'}
+                          </span>
+                        </div>
+                        <span className={`text-2xl font-bold ${
+                          selectedRun.results.verification.confidence >= 75
+                            ? 'text-green-600'
+                            : selectedRun.results.verification.confidence >= 50
+                            ? 'text-yellow-600'
+                            : 'text-red-600'
+                        }`}>
+                          {selectedRun.results.verification.confidence}%
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-600 mb-2">
+                        Confidence Score: {selectedRun.results.verification.confidence}% match with expected CRO patterns
+                      </p>
+                      {selectedRun.results.verification.issues.length > 0 && (
+                        <div className="mt-3 text-sm">
+                          <p className="font-semibold text-gray-700 mb-1">Issues Found:</p>
+                          <ul className="list-disc list-inside space-y-1">
+                            {selectedRun.results.verification.issues.map((issue, i) => (
+                              <li key={i} className="text-gray-700">{issue}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <AuditDisplay auditResult={selectedRun.results.audit_result} />
+                    <TestPlanDisplay testPlan={selectedRun.results.test_plan} />
+                  </div>
+                </>
               )}
 
               {/* Pending / running state */}
