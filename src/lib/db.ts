@@ -3,6 +3,16 @@ import type { Site, TestPlan, AuditResult, MetricsSnapshot } from "@/types";
 
 // ── Database schema type map ─────────────────────────────────
 
+// supabase-js's GenericTable requires Row/Insert/Update to satisfy
+// Record<string, unknown>; interfaces lack an index signature, so map
+// each into a plain object type to keep the typed client from collapsing to `never`.
+type Table<Row, Ins, Upd> = {
+  Row: { [K in keyof Row]: Row[K] };
+  Insert: { [K in keyof Ins]: Ins[K] };
+  Update: { [K in keyof Upd]: Upd[K] };
+  Relationships: [];
+};
+
 export interface Database {
   public: {
     Tables: {
