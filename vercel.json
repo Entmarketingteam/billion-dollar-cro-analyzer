@@ -4,7 +4,7 @@
   "devCommand": "npm run dev",
   "outputDirectory": ".next",
   "functions": {
-    "api/**/*.ts": {
+    "src/app/api/**/*.ts": {
       "maxDuration": 60
     }
   },
