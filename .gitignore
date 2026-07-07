@@ -35,3 +35,4 @@ next-env.d.ts
 # Testing
 coverage/
 .jest-cache/
+.vercel
