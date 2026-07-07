@@ -1,6 +1,8 @@
 import { listSites } from '@/lib/db';
 import SiteCard from '@/components/SiteCard';
 
+export const dynamic = 'force-dynamic';
+
 export default async function DashboardPage() {
   const sites = await listSites();
 
