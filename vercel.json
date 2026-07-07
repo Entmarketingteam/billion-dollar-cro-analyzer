@@ -3,22 +3,6 @@
   "buildCommand": "npm run build",
   "devCommand": "npm run dev",
   "outputDirectory": ".next",
-  "envDescription": {
-    "NEXT_PUBLIC_SUPABASE_URL": "Supabase project URL",
-    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "Supabase anonymous API key (public)",
-    "SUPABASE_SERVICE_ROLE_KEY": "Supabase service role key (server-only, bypasses RLS)",
-    "SHOPIFY_OAUTH_CLIENT_ID": "Shopify app OAuth client ID",
-    "SHOPIFY_OAUTH_CLIENT_SECRET": "Shopify app OAuth client secret",
-    "SHOPIFY_REDIRECT_URI": "Shopify OAuth callback URL (e.g., https://yourdomain.com/api/shopify/oauth-callback)",
-    "GA4_OAUTH_CLIENT_ID": "Google OAuth 2.0 client ID for GA4 integration",
-    "GA4_OAUTH_CLIENT_SECRET": "Google OAuth 2.0 client secret for GA4 integration",
-    "GA4_REDIRECT_URI": "GA4 OAuth callback URL (e.g., https://yourdomain.com/api/ga4/oauth-callback)",
-    "ANTHROPIC_API_KEY": "Claude API key for test plan generation",
-    "AIRTABLE_API_TOKEN": "Airtable personal access token (pat...)",
-    "AIRTABLE_BASE_ID": "Airtable base ID (app...)",
-    "RESEND_API_KEY": "Optional: Resend API key for email notifications",
-    "SLACK_WEBHOOK_URL": "Optional: Slack webhook URL for notifications"
-  },
   "functions": {
     "api/**/*.ts": {
       "maxDuration": 60
