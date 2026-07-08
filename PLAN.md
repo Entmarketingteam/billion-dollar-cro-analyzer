@@ -5,7 +5,13 @@
 > Shopify app config deployed (redirect URLs + read scopes). Remaining before first
 > real run: add `https://billion-dollar-cro-analyzer.vercel.app/api/ga4/oauth-callback`
 > (+ localhost:3000 equivalent) to the Google Cloud OAuth client — console-only, no API.
-> Then P1 (secret rotation, Airtable probe-or-drop, migration gap, LLM-JSON retry).
+> **P1 code items done 2026-07-08:** LLM-JSON repair-retry via shared `claude-json.ts`
+> (model → claude-sonnet-5); Airtable sync **dropped** (probe showed the Doppler token
+> is dead — `whoami` 401 — and the base was never verified; Slack covers visibility);
+> prod Supabase verified — **`test_runs` table was missing entirely** and has now been
+> applied via migration (the wired flow would have crashed on first run). The 001→002→004
+> file gap is cosmetic (ordering preserved); left as-is.
+> **Still owed (human):** rotate Shopify + GA4 secrets; add the GA4 redirect URIs above.
 
 > Written 2026-07-08 from a full repo audit. Deployment is live at
 > https://billion-dollar-cro-analyzer.vercel.app with all OAuth credentials configured

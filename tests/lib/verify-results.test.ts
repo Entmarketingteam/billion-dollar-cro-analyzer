@@ -236,12 +236,15 @@ describe("verify-results.ts", () => {
         model: "claude-opus-4-1",
       };
 
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
+      const badResponse = {
         ok: true,
         json: async () => ({
           content: [{ text: "This is not JSON" }],
         }),
-      });
+      };
+      (global.fetch as jest.Mock)
+        .mockResolvedValueOnce(badResponse)
+        .mockResolvedValueOnce(badResponse);
 
       const result = await verifyAuditResults(auditResult, testPlan);
 

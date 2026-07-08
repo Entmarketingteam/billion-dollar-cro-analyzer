@@ -62,7 +62,7 @@ describe("claude-agent.ts", () => {
       expect(result.benchmark_conversion_rate).toBe(2.5); // apparel benchmark
       expect(result.benchmark_aov).toBe(75);
       expect(result.site_industry).toBe("apparel");
-      expect(result.model).toBe("claude-opus-4-1");
+      expect(result.model).toBe("claude-sonnet-5");
     });
 
     it("posts to the Anthropic API with correct headers", async () => {
@@ -325,13 +325,16 @@ describe("claude-agent.ts", () => {
       expect(result.tests[0].id).toBe("t1");
     });
 
-    it("throws on invalid JSON response", async () => {
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
+    it("throws when both the response and the repair retry lack valid JSON", async () => {
+      const badResponse = {
         ok: true,
         json: async () => ({
           content: [{ text: "This is not JSON at all" }],
         }),
-      });
+      };
+      (global.fetch as jest.Mock)
+        .mockResolvedValueOnce(badResponse)
+        .mockResolvedValueOnce(badResponse);
 
       await expect(
         generateTestPlanFromMetrics({
@@ -345,6 +348,37 @@ describe("claude-agent.ts", () => {
           deviceBreakdown: { desktop: 1500, mobile: 900, tablet: 100 },
         })
       ).rejects.toThrow(/did not contain valid JSON/);
+    });
+
+    it("recovers when the repair retry returns valid JSON", async () => {
+      (global.fetch as jest.Mock)
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({ content: [{ text: "not json" }] }),
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            content: [{ text: JSON.stringify({ tests: [] }) }],
+          }),
+        });
+
+      const result = await generateTestPlanFromMetrics({
+        siteUrl: "https://example.com",
+        industry: null,
+        conversionRate: 2,
+        aov: 100,
+        revenue: 5000,
+        sessions: 2500,
+        transactions: 50,
+        deviceBreakdown: { desktop: 1500, mobile: 900, tablet: 100 },
+      });
+
+      expect(result.tests).toEqual([]);
+      expect((global.fetch as jest.Mock).mock.calls.length).toBe(2);
+      const retryBody = JSON.parse((global.fetch as jest.Mock).mock.calls[1][1].body);
+      expect(retryBody.messages.length).toBe(3);
+      expect(retryBody.messages[2].content).toContain("could not be parsed");
     });
 
     it("throws on API error (non-ok response)", async () => {
