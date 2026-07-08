@@ -1,4 +1,4 @@
-import { chromium } from '@playwright/test';
+import { chromium, type Browser } from 'playwright-core';
 
 export interface AuditCheckItem {
   category: string;
@@ -7,11 +7,25 @@ export interface AuditCheckItem {
   details?: string;
 }
 
+// On Vercel there is no bundled browser — use @sparticuz/chromium's binary.
+// Locally, the full `playwright` package's downloaded Chromium is used.
+async function launchChromium(): Promise<Browser> {
+  if (process.env.VERCEL) {
+    const sparticuz = (await import('@sparticuz/chromium')).default;
+    return chromium.launch({
+      args: sparticuz.args,
+      executablePath: await sparticuz.executablePath(),
+      headless: true,
+    });
+  }
+  return chromium.launch({ headless: true });
+}
+
 export async function runPlaywrightAudit(siteUrl: string): Promise<{
   checklist_items: AuditCheckItem[];
   score_pct: number;
 }> {
-  const browser = await chromium.launch({ headless: true });
+  const browser = await launchChromium();
   const checklist_items: AuditCheckItem[] = [];
 
   try {

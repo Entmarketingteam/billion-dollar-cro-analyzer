@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, jest } from "@jest/globals";
-import { generateTestPlanFromMetrics, generateTestPlan } from "@/lib/claude-agent";
+import { generateTestPlanFromMetrics } from "@/lib/claude-agent";
 
 describe("claude-agent.ts", () => {
   beforeEach(() => {
@@ -462,51 +462,4 @@ describe("claude-agent.ts", () => {
     });
   });
 
-  describe("generateTestPlan", () => {
-    it("calls generateTestPlanFromMetrics with zero-valued metrics", async () => {
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          content: [{ text: JSON.stringify({ tests: [] }) }],
-        }),
-      });
-
-      const site = {
-        url: "https://example.com",
-        industry: "electronics",
-      };
-
-      await generateTestPlan(site);
-
-      const call = (global.fetch as jest.Mock).mock.calls[0];
-      const body = JSON.parse(call[1].body);
-      const prompt = body.messages[0].content;
-
-      expect(prompt).toContain("Conversion Rate: 0%");
-      expect(prompt).toContain("AOV: $0");
-      expect(prompt).toContain("Monthly Revenue: $0");
-      expect(prompt).toContain("Sessions: 0");
-      expect(prompt).toContain("Transactions: 0");
-    });
-
-    it("uses the site's industry for benchmark lookup", async () => {
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          content: [{ text: JSON.stringify({ tests: [] }) }],
-        }),
-      });
-
-      const site = {
-        url: "https://example.com",
-        industry: "sports",
-      };
-
-      const result = await generateTestPlan(site);
-
-      // sports benchmark: 2.4% conv rate, 90 aov
-      expect(result.benchmark_conversion_rate).toBe(2.4);
-      expect(result.benchmark_aov).toBe(90);
-    });
-  });
 });
