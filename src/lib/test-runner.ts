@@ -3,7 +3,6 @@ import { performAudit } from './playwright-audit';
 import { generateTestPlanFromMetrics } from './claude-agent';
 import { fetchShopifyMetrics } from './shopify';
 import { fetchGA4Metrics, refreshGA4Token } from './ga4';
-import { syncToAirtable } from './airtable';
 import { notifySlack } from './slack';
 import { verifyAuditResults } from './verify-results';
 import type { MetricsData, Site } from '@/types';
