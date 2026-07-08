@@ -22,5 +22,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/api/analyze/:path*", "/api/audit/:path*"],
+  matcher: ["/dashboard/:path*", "/api/analyze-async/:path*", "/api/audit/:path*"],
 };
