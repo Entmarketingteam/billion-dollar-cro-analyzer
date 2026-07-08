@@ -1,3 +1,4 @@
+import { createHmac, timingSafeEqual } from "node:crypto";
 import type { MetricsData } from "@/types";
 
 const SHOPIFY_CLIENT_ID = process.env.SHOPIFY_OAUTH_CLIENT_ID || "";
@@ -15,18 +16,54 @@ function toDomain(storeUrl: string): string {
   return new URL(withProtocol).hostname;
 }
 
-export function getShopifyAuthUrl(storeUrl: string): string {
+// OAuth must target the *.myshopify.com admin domain, not a custom storefront
+// domain. Accepts "foo", "foo.myshopify.com", or a full URL; returns the
+// myshopify hostname or null if it can't be one.
+export function normalizeShopDomain(input: string): string | null {
+  const trimmed = input.trim().toLowerCase();
+  if (!trimmed) return null;
+  const host = /^[a-z0-9][a-z0-9-]*$/.test(trimmed)
+    ? `${trimmed}.myshopify.com`
+    : toDomain(trimmed);
+  return /^[a-z0-9][a-z0-9-]*\.myshopify\.com$/.test(host) ? host : null;
+}
+
+export function getShopifyAuthUrl(
+  storeUrl: string,
+  opts?: { state?: string; redirectUri?: string }
+): string {
   const domain = toDomain(storeUrl);
-  const state = Math.random().toString(36).substring(2);
+  const state = opts?.state ?? Math.random().toString(36).substring(2);
 
   const params = new URLSearchParams({
     client_id: SHOPIFY_CLIENT_ID,
     scope: SCOPES,
-    redirect_uri: SHOPIFY_REDIRECT_URI,
+    redirect_uri: opts?.redirectUri ?? SHOPIFY_REDIRECT_URI,
     state,
   });
 
   return `https://${domain}/admin/oauth/authorize?${params.toString()}`;
+}
+
+// Verify Shopify's HMAC on OAuth callback query params.
+// https://shopify.dev/docs/apps/build/authentication-authorization/access-tokens/authorization-code-grant#verify-a-request
+export function verifyShopifyHmac(searchParams: URLSearchParams): boolean {
+  const hmac = searchParams.get("hmac");
+  if (!hmac || !SHOPIFY_CLIENT_SECRET) return false;
+
+  const message = [...searchParams.entries()]
+    .filter(([key]) => key !== "hmac" && key !== "signature")
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([key, value]) => `${key}=${value}`)
+    .join("&");
+
+  const digest = createHmac("sha256", SHOPIFY_CLIENT_SECRET)
+    .update(message)
+    .digest("hex");
+
+  const a = Buffer.from(digest, "utf8");
+  const b = Buffer.from(hmac, "utf8");
+  return a.length === b.length && timingSafeEqual(a, b);
 }
 
 export async function exchangeCodeForToken(
