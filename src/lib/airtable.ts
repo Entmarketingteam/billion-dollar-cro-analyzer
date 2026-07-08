@@ -1,16 +1,6 @@
-import type { TestPlanAnalysis } from "@/types";
-import type { AuditCheckItem } from "./playwright-real";
-
-interface AuditResultInput {
-  checklist_items: AuditCheckItem[];
-  score_pct: number;
-}
-
 const AIRTABLE_API_TOKEN = process.env.AIRTABLE_API_TOKEN || "";
 const AIRTABLE_BASE_ID = process.env.AIRTABLE_BASE_ID || "";
 const AIRTABLE_ANALYSES_TABLE = "Analyses";
-const AIRTABLE_TESTS_TABLE = "Tests";
-const AIRTABLE_AUDIT_RESULTS_TABLE = "AuditResults";
 
 interface AirtableRecord {
   id: string;
