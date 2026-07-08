@@ -10,23 +10,28 @@ const GA4_SCOPE = "https://www.googleapis.com/auth/analytics.readonly";
 
 // ── OAuth flow ───────────────────────────────────────────────
 
-export function getGA4AuthUrl(): string {
-  const state = Math.random().toString(36).substring(2);
+export function getGA4AuthUrl(opts?: {
+  state?: string;
+  redirectUri?: string;
+}): string {
+  const state = opts?.state ?? Math.random().toString(36).substring(2);
+  const redirectUri = opts?.redirectUri ?? GA4_REDIRECT_URI;
 
   return (
     `https://accounts.google.com/o/oauth2/v2/auth?` +
     `client_id=${encodeURIComponent(GA4_CLIENT_ID)}` +
     `&scope=${encodeURIComponent(GA4_SCOPE)}` +
-    `&redirect_uri=${encodeURIComponent(GA4_REDIRECT_URI)}` +
+    `&redirect_uri=${encodeURIComponent(redirectUri)}` +
     `&response_type=code` +
-    `&state=${state}` +
+    `&state=${encodeURIComponent(state)}` +
     `&access_type=offline` +
     `&prompt=consent`
   );
 }
 
 export async function exchangeCodeForToken(
-  code: string
+  code: string,
+  redirectUri?: string
 ): Promise<{ access_token: string; refresh_token: string }> {
   const response = await fetch("https://oauth2.googleapis.com/token", {
     method: "POST",
@@ -36,7 +41,7 @@ export async function exchangeCodeForToken(
       client_secret: GA4_CLIENT_SECRET,
       code,
       grant_type: "authorization_code",
-      redirect_uri: GA4_REDIRECT_URI,
+      redirect_uri: redirectUri ?? GA4_REDIRECT_URI,
     }),
   });
 
