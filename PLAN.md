@@ -1,5 +1,12 @@
 # CRO Analyzer — V1 Ship Plan
 
+> **STATUS 2026-07-08: P0 SHIPPED** (commit `eefd31f`, deployed + smoke-tested in prod).
+> Both connect flows live, analysis uses real metrics, serverless model fixed,
+> Shopify app config deployed (redirect URLs + read scopes). Remaining before first
+> real run: add `https://billion-dollar-cro-analyzer.vercel.app/api/ga4/oauth-callback`
+> (+ localhost:3000 equivalent) to the Google Cloud OAuth client — console-only, no API.
+> Then P1 (secret rotation, Airtable probe-or-drop, migration gap, LLM-JSON retry).
+
 > Written 2026-07-08 from a full repo audit. Deployment is live at
 > https://billion-dollar-cro-analyzer.vercel.app with all OAuth credentials configured
 > (Shopify + GA4 in Vercel prod and Doppler `ent-agency-automation/dev`).
