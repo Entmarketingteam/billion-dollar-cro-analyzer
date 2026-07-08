@@ -1,6 +1,5 @@
 import type { TestPlanAnalysis } from "@/types";
-
-const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY || "";
+import { claudeJson, CLAUDE_MODEL } from "./claude-json";
 
 interface AnalysisInput {
   siteUrl: string;
