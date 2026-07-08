@@ -36,3 +36,6 @@ next-env.d.ts
 coverage/
 .jest-cache/
 .vercel
+
+# local secret files (GA4 OAuth client secret lives here)
+.env.local.*
