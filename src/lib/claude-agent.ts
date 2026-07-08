@@ -106,7 +106,7 @@ Do not include any text outside the JSON object.`;
         })
       ),
       generated_at: new Date().toISOString(),
-      model: "claude-opus-4-1",
+      model: CLAUDE_MODEL,
     };
   } catch (error) {
     console.error("Claude analysis failed:", error);
