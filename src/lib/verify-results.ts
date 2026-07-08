@@ -1,6 +1,5 @@
 import type { TestPlanAnalysis } from "@/types";
-
-const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY || "";
+import { claudeJson, ClaudeApiError, ClaudeJsonError } from "./claude-json";
 
 export interface ResultVerification {
   verified: boolean;
