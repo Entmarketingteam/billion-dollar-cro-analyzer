@@ -9,6 +9,7 @@ interface SiteCardProps {
     id: string;
     name: string;
     url: string;
+    ga4Connected?: boolean;
   };
 }
 
