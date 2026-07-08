@@ -106,10 +106,6 @@ export async function runAnalysisJob(testRunId: string): Promise<void> {
 
     await updateTestRunStatus(testRunId, 'completed', results);
 
-    await syncToAirtable(testRunId, results).catch((e) =>
-      console.error('Airtable sync failed:', e)
-    );
-
     await notifySlack(
       '✅ Analysis Complete',
       `Analysis for ${site.name} completed successfully`,
