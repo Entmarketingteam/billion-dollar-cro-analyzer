@@ -72,6 +72,48 @@ export async function refreshGA4Token(refreshToken: string): Promise<string> {
   return data.access_token;
 }
 
+// ── Property listing (GA4 Admin API v1beta) ──────────────────
+
+export interface GA4Property {
+  propertyId: string; // numeric id, e.g. "123456789"
+  displayName: string;
+  accountName: string;
+}
+
+// Lists all GA4 properties the authorized user can read, flattened from
+// accountSummaries. Covered by the analytics.readonly scope.
+export async function listGA4Properties(
+  accessToken: string
+): Promise<GA4Property[]> {
+  const properties: GA4Property[] = [];
+  let pageToken = "";
+
+  do {
+    const url =
+      `https://analyticsadmin.googleapis.com/v1beta/accountSummaries?pageSize=200` +
+      (pageToken ? `&pageToken=${encodeURIComponent(pageToken)}` : "");
+    const response = await fetch(url, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    if (!response.ok) {
+      throw new Error(`GA4 account summaries fetch failed: ${response.status}`);
+    }
+    const data = await response.json();
+    for (const account of data.accountSummaries ?? []) {
+      for (const prop of account.propertySummaries ?? []) {
+        properties.push({
+          propertyId: String(prop.property ?? "").replace("properties/", ""),
+          displayName: prop.displayName ?? "",
+          accountName: account.displayName ?? "",
+        });
+      }
+    }
+    pageToken = data.nextPageToken ?? "";
+  } while (pageToken);
+
+  return properties;
+}
+
 // ── Metrics fetch (GA4 Data API v1beta) ──────────────────────
 
 interface GA4Row {
