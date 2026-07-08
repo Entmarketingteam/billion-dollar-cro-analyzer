@@ -149,18 +149,3 @@ Do not include any text outside the JSON object.`;
     throw error;
   }
 }
-
-// Accepts a Site object (url, industry) with zero-value metrics defaults.
-// Used by test-runner where metrics are not available at run time.
-export async function generateTestPlan(site: any): Promise<TestPlanAnalysis> {
-  return generateTestPlanFromMetrics({
-    siteUrl: site.url,
-    industry: site.industry ?? null,
-    conversionRate: 0,
-    aov: 0,
-    revenue: 0,
-    sessions: 0,
-    transactions: 0,
-    deviceBreakdown: { desktop: 0, mobile: 0, tablet: 0 },
-  });
-}
