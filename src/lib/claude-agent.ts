@@ -77,42 +77,7 @@ Generate 5-8 tests that are:
 Do not include any text outside the JSON object.`;
 
   try {
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "x-api-key": ANTHROPIC_API_KEY,
-        "anthropic-version": "2023-06-01",
-        "content-type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "claude-opus-4-1",
-        max_tokens: 2048,
-        messages: [
-          {
-            role: "user",
-            content: prompt,
-          },
-        ],
-      }),
-    });
-
-    if (!response.ok) {
-      const error = await response.text();
-      throw new Error(
-        `Claude API error: ${response.status} ${error.substring(0, 200)}`
-      );
-    }
-
-    const data = await response.json();
-    const content = data.content[0]?.text || "";
-
-    // Parse the JSON response
-    const jsonMatch = content.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
-      throw new Error("Claude response did not contain valid JSON");
-    }
-
-    const parsed = JSON.parse(jsonMatch[0]);
+    const parsed = await claudeJson(prompt, 2048);
 
     return {
       site_industry: input.industry || "Unknown",
