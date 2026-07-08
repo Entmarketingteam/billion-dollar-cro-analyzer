@@ -3,12 +3,21 @@ import { exchangeCodeForToken } from "@/lib/ga4";
 import { createServerClient } from "@/lib/db";
 import { getUserFromCookie } from "@/lib/auth";
 
+const NONCE_COOKIE = "ga4_oauth_nonce";
+
 export async function GET(request: NextRequest) {
   const code = request.nextUrl.searchParams.get("code");
-  const siteId = request.nextUrl.searchParams.get("siteId");
+  // Google echoes back the `state` we sent from /api/ga4/authorize: "siteId:nonce"
+  const state = request.nextUrl.searchParams.get("state") || "";
+  const [siteId, nonce] = state.split(":");
 
-  if (!code || !siteId) {
+  if (!code || !siteId || !nonce) {
     return NextResponse.json({ error: "Missing parameters" }, { status: 400 });
+  }
+
+  const expectedNonce = request.cookies.get(NONCE_COOKIE)?.value;
+  if (!expectedNonce || nonce !== expectedNonce) {
+    return NextResponse.json({ error: "Invalid state" }, { status: 401 });
   }
 
   try {
@@ -17,18 +26,26 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(new URL("/login", request.url));
     }
 
-    const { refresh_token } = await exchangeCodeForToken(code);
+    // Token exchange must use the exact redirect_uri sent on authorize.
+    const redirectUri = new URL(
+      "/api/ga4/oauth-callback",
+      request.nextUrl.origin
+    ).toString();
+    const { refresh_token } = await exchangeCodeForToken(code, redirectUri);
 
     const supabase = createServerClient();
-    await supabase
+    const { error } = await supabase
       .from("sites")
       .update({ ga4_refresh_token: refresh_token })
-      .eq("id", siteId)
-      .eq("user_id", user);
+      .eq("id", siteId);
+    if (error) throw error;
 
-    return NextResponse.redirect(
-      new URL(`/dashboard/${siteId}?ga4=connected`, request.url)
+    // Property selection is the required next step — GA4 metrics need it.
+    const response = NextResponse.redirect(
+      new URL(`/dashboard/${siteId}/ga4-setup`, request.url)
     );
+    response.cookies.delete(NONCE_COOKIE);
+    return response;
   } catch (error) {
     console.error("GA4 OAuth callback error:", error);
     return NextResponse.json({ error: "OAuth exchange failed" }, { status: 500 });
