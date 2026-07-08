@@ -36,7 +36,7 @@ describe('Dashboard Page', () => {
     const component = await DashboardPage();
     render(component);
 
-    expect(screen.getByText('No sites connected yet')).toBeInTheDocument();
+    expect(screen.getByText(/No sites connected yet/)).toBeInTheDocument();
   });
 
   it('renders site names and URLs when sites are present', async () => {
