@@ -55,53 +55,7 @@ Examples:
 Do not include any text outside the JSON object.`;
 
   try {
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "x-api-key": ANTHROPIC_API_KEY,
-        "anthropic-version": "2023-06-01",
-        "content-type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "claude-opus-4-1",
-        max_tokens: 1024,
-        messages: [
-          {
-            role: "user",
-            content: prompt,
-          },
-        ],
-      }),
-    });
-
-    if (!response.ok) {
-      const error = await response.text();
-      console.error("Verification API error:", error);
-      // Non-blocking: return low confidence on API error
-      return {
-        verified: false,
-        confidence: 0,
-        issues: ["Verification service unavailable"],
-        verifiedAt: new Date().toISOString(),
-      };
-    }
-
-    const data = await response.json();
-    const content = data.content[0]?.text || "";
-
-    // Parse the JSON response
-    const jsonMatch = content.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
-      console.error("Invalid verification response:", content);
-      return {
-        verified: false,
-        confidence: 0,
-        issues: ["Invalid verification response"],
-        verifiedAt: new Date().toISOString(),
-      };
-    }
-
-    const parsed = JSON.parse(jsonMatch[0]);
+    const parsed = await claudeJson(prompt, 1024);
 
     return {
       verified: Boolean(parsed.verified),
@@ -111,11 +65,19 @@ Do not include any text outside the JSON object.`;
     };
   } catch (error) {
     console.error("Verification failed:", error);
-    // Non-blocking: return low confidence on error
+    // Non-blocking: always return a low-confidence result instead of throwing
+    const issue =
+      error instanceof ClaudeApiError
+        ? "Verification service unavailable"
+        : error instanceof ClaudeJsonError
+          ? "Invalid verification response"
+          : error instanceof Error
+            ? error.message
+            : "Verification error";
     return {
       verified: false,
       confidence: 0,
-      issues: [error instanceof Error ? error.message : "Verification error"],
+      issues: [issue],
       verifiedAt: new Date().toISOString(),
     };
   }
