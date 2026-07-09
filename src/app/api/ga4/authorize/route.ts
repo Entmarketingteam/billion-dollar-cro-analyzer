@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
   // Google echoes `state` back on the callback; carry the siteId in it.
   const state = `${siteId}:${nonce}`;
   const redirectUri = new URL(
-    "/api/ga4/oauth-callback",
+    GA4_CALLBACK_PATH,
     request.nextUrl.origin
   ).toString();
 
