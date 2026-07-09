@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { exchangeCodeForToken } from "@/lib/ga4";
+import { exchangeCodeForToken, GA4_CALLBACK_PATH } from "@/lib/ga4";
 import { createServerClient } from "@/lib/db";
 import { getUserFromCookie } from "@/lib/auth";
 
