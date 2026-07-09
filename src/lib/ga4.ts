@@ -8,6 +8,10 @@ export const GA4_REDIRECT_URI = process.env.GA4_REDIRECT_URI || "";
 
 const GA4_SCOPE = "https://www.googleapis.com/auth/analytics.readonly";
 
+// Path registered as an authorized redirect URI on the Google OAuth client.
+// Served by src/app/auth/callback/route.ts (aliases the GA4 callback).
+export const GA4_CALLBACK_PATH = "/auth/callback";
+
 // ── OAuth flow ───────────────────────────────────────────────
 
 export function getGA4AuthUrl(opts?: {
