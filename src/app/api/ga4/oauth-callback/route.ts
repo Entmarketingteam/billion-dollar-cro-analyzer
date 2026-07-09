@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
 
     // Token exchange must use the exact redirect_uri sent on authorize.
     const redirectUri = new URL(
-      "/api/ga4/oauth-callback",
+      GA4_CALLBACK_PATH,
       request.nextUrl.origin
     ).toString();
     const { refresh_token } = await exchangeCodeForToken(code, redirectUri);
