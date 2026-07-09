@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getGA4AuthUrl } from "@/lib/ga4";
+import { getGA4AuthUrl, GA4_CALLBACK_PATH } from "@/lib/ga4";
 import { getUserFromCookie } from "@/lib/auth";
 
 const NONCE_COOKIE = "ga4_oauth_nonce";
