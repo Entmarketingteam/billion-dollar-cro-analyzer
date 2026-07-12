@@ -15,9 +15,9 @@ const BANNERS: Record<string, { kind: 'error' | 'success'; text: string }> = {
 export default async function DashboardPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string; success?: string }>;
-}) {
-  const params = await searchParams;
+  searchParams?: Promise<{ error?: string; success?: string }>;
+} = {}) {
+  const params = (await searchParams) ?? {};
   const banner = BANNERS[params.error ?? params.success ?? ''];
   const sites = await listSites();
 
