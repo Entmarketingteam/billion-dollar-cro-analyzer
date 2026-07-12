@@ -33,6 +33,24 @@ export async function GET(request: NextRequest) {
 
     const accessToken = await exchangeCodeForToken(code, shop);
 
+    // The myshopify handle is often auto-generated (e.g. 4dca35-2); ask the
+    // Admin API for the store's real name and primary storefront domain.
+    let name = shop.replace(/\.myshopify\.com$/, "");
+    let url = `https://${shop}`;
+    try {
+      const shopInfo = await fetch(
+        `https://${shop}/admin/api/2024-01/shop.json`,
+        { headers: { "X-Shopify-Access-Token": accessToken } }
+      );
+      if (shopInfo.ok) {
+        const { shop: info } = await shopInfo.json();
+        if (info?.name) name = info.name;
+        if (info?.domain) url = `https://${info.domain}`;
+      }
+    } catch {
+      // Fall back to the myshopify handle.
+    }
+
     const supabase = createServerClient();
 
     // Re-connecting an existing store refreshes its token instead of
