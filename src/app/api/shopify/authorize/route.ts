@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getShopifyAuthUrl, normalizeShopDomain } from "@/lib/shopify";
+import { getShopifyAuthUrl, resolveShopDomain } from "@/lib/shopify";
 import { getUserFromCookie } from "@/lib/auth";
 
 const STATE_COOKIE = "shopify_oauth_state";
