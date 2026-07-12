@@ -11,7 +11,11 @@
 > prod Supabase verified — **`test_runs` table was missing entirely** and has now been
 > applied via migration (the wired flow would have crashed on first run). The 001→002→004
 > file gap is cosmetic (ordering preserved); left as-is.
-> **Still owed (human):** rotate Shopify + GA4 secrets; add the GA4 redirect URIs above.
+> **GA4 redirect resolved 2026-07-08:** app now uses the already-registered `/auth/callback`
+> path (aliased to the GA4 callback) — verified against Google, no console work needed.
+> **Secret rotation (Shopify client secret + app token, GA4 client secret): deliberately
+> deferred by Ethan 2026-07-11.** Don't re-raise unless something leaks; rotate before
+> any external launch of this tool.
 
 > Written 2026-07-08 from a full repo audit. Deployment is live at
 > https://billion-dollar-cro-analyzer.vercel.app with all OAuth credentials configured
