@@ -28,6 +28,36 @@ export function normalizeShopDomain(input: string): string | null {
   return /^[a-z0-9][a-z0-9-]*\.myshopify\.com$/.test(host) ? host : null;
 }
 
+// Resolves any store input to its myshopify admin domain. Custom storefront
+// domains (e.g. stiffpour.co) embed their myshopify host in the page source —
+// the handle is often auto-generated (4dca35-2.myshopify.com) and unknown to
+// the merchant, so fetch and extract it rather than making the user find it.
+export async function resolveShopDomain(input: string): Promise<string | null> {
+  const direct = normalizeShopDomain(input);
+  if (direct) return direct;
+
+  let host: string;
+  try {
+    host = toDomain(input.trim());
+  } catch {
+    return null;
+  }
+
+  try {
+    const response = await fetch(`https://${host}/`, {
+      headers: { "user-agent": "Mozilla/5.0 (compatible; CROAnalyzer/1.0)" },
+      redirect: "follow",
+      signal: AbortSignal.timeout(8000),
+    });
+    if (!response.ok) return null;
+    const html = await response.text();
+    const match = html.match(/([a-z0-9][a-z0-9-]*\.myshopify\.com)/i);
+    return match ? match[1].toLowerCase() : null;
+  } catch {
+    return null;
+  }
+}
+
 export function getShopifyAuthUrl(
   storeUrl: string,
   opts?: { state?: string; redirectUri?: string }
