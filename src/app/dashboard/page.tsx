@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 const BANNERS: Record<string, { kind: 'error' | 'success'; text: string }> = {
   invalid_shop_domain: {
     kind: 'error',
-    text: 'That doesn’t look like a Shopify admin domain. Enter the store’s myshopify handle (e.g. "your-store" or "your-store.myshopify.com") — the custom storefront domain (like stiffpour.co) won’t work for OAuth.',
+    text: 'Couldn’t find a Shopify store at that domain. Enter the storefront URL (e.g. stiffpour.co) or the myshopify handle (your-store.myshopify.com) and make sure the site is reachable.',
   },
   store_added: { kind: 'success', text: 'Store connected successfully.' },
 };
