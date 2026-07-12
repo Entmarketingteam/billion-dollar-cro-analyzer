@@ -70,8 +70,8 @@ export async function GET(request: NextRequest) {
     } else {
       const { error } = await supabase.from("sites").insert({
         user_id: user,
-        name: shop.replace(/\.myshopify\.com$/, ""),
-        url: `https://${shop}`,
+        name,
+        url,
         shopify_domain: shop,
         shopify_access_token: accessToken,
         industry: null,
