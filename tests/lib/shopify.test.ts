@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, jest } from "@jest/globals";
-import { getShopifyAuthUrl, exchangeCodeForToken, fetchShopifyMetrics } from "@/lib/shopify";
+import { getShopifyAuthUrl, exchangeCodeForToken, fetchShopifyMetrics, resolveShopDomain } from "@/lib/shopify";
 import type { MetricsData } from "@/types";
 
 describe("shopify.ts", () => {
@@ -327,4 +327,32 @@ describe("shopify.ts", () => {
       expect(url).toMatch(/\d{4}-\d{2}-\d{2}T/); // ISO format check
     });
   });
+
+  describe("resolveShopDomain", () => {
+    it("passes a myshopify handle through without fetching", async () => {
+      const result = await resolveShopDomain("my-store");
+      expect(result).toBe("my-store.myshopify.com");
+      expect(global.fetch).not.toHaveBeenCalled();
+    });
+
+    it("extracts the myshopify host from a custom storefront domain", async () => {
+      (global.fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        text: async () =>
+          '<script>window.Shopify={shop:"4dca35-2.myshopify.com"}</script>',
+      });
+      const result = await resolveShopDomain("stiffpour.co");
+      expect(result).toBe("4dca35-2.myshopify.com");
+    });
+
+    it("returns null when the storefront has no myshopify reference", async () => {
+      (global.fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        text: async () => "<html>not a shopify site</html>",
+      });
+      const result = await resolveShopDomain("example.org");
+      expect(result).toBeNull();
+    });
+  });
+
 });

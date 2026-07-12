@@ -47,7 +47,10 @@ export async function resolveShopDomain(input: string): Promise<string | null> {
     const response = await fetch(`https://${host}/`, {
       headers: { "user-agent": "Mozilla/5.0 (compatible; CROAnalyzer/1.0)" },
       redirect: "follow",
-      signal: AbortSignal.timeout(8000),
+      signal:
+        typeof AbortSignal.timeout === "function"
+          ? AbortSignal.timeout(8000)
+          : undefined,
     });
     if (!response.ok) return null;
     const html = await response.text();
