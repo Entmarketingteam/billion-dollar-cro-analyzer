@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
   }
 
   const shopInput = request.nextUrl.searchParams.get("shop") || "";
-  const shop = normalizeShopDomain(shopInput);
+  const shop = await resolveShopDomain(shopInput);
   if (!shop) {
     return NextResponse.redirect(
       new URL("/dashboard?error=invalid_shop_domain", request.url)
