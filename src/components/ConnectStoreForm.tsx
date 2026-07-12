@@ -17,7 +17,7 @@ export default function ConnectStoreForm() {
         type="text"
         value={shop}
         onChange={(e) => setShop(e.target.value)}
-        placeholder="your-store.myshopify.com"
+        placeholder="stiffpour.co or your-store.myshopify.com"
         className="flex-1 max-w-sm border rounded px-3 py-2 text-sm text-gray-900 placeholder-gray-400"
       />
       <button
