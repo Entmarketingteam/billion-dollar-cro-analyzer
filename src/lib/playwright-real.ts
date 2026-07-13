@@ -9,7 +9,10 @@ export interface AuditCheckItem {
 
 // On Vercel there is no bundled browser — use @sparticuz/chromium's binary.
 // Locally, the full `playwright` package's downloaded Chromium is used.
+// Lazy imports: a tracing/load failure surfaces as a per-run error instead
+// of killing the whole route module at import time.
 async function launchChromium(): Promise<Browser> {
+  const { chromium } = await import('playwright-core');
   if (process.env.VERCEL) {
     const sparticuz = (await import('@sparticuz/chromium')).default;
     return chromium.launch({
