@@ -1,11 +1,12 @@
 import { getTestRun, updateTestRunStatus, getSiteById, createServerClient } from './db';
 import { performAudit } from './playwright-audit';
-import { generateTestPlanFromMetrics } from './claude-agent';
+import { generateTestPlanFromMetrics, generateFixPacks, type AuditContext } from './claude-agent';
 import { fetchShopifyMetrics } from './shopify';
 import { fetchGA4Metrics, refreshGA4Token } from './ga4';
 import { notifySlack } from './slack';
 import { verifyAuditResults } from './verify-results';
 import type { MetricsData, Site } from '@/types';
+import type { CrawlAuditResult } from './playwright-real';
 
 function emptyMetrics(): MetricsData {
   const periodEnd = new Date();
@@ -53,6 +54,36 @@ export async function fetchSiteMetrics(site: Site): Promise<MetricsData | null> 
   return metrics;
 }
 
+// Uploads crawl screenshots to the public audit-screenshots bucket.
+// Best-effort: a failed upload drops that screenshot, never the run.
+async function uploadScreenshots(
+  audit: CrawlAuditResult,
+  siteId: string,
+  testRunId: string
+): Promise<Array<{ label: string; url: string }>> {
+  const supabase = createServerClient();
+  const out: Array<{ label: string; url: string }> = [];
+
+  for (const page of audit.pages) {
+    if (!page.screenshotBase64) continue;
+    const path = `${siteId}/${testRunId}/${page.label}.jpg`;
+    try {
+      const { error } = await supabase.storage
+        .from('audit-screenshots')
+        .upload(path, Buffer.from(page.screenshotBase64, 'base64'), {
+          contentType: 'image/jpeg',
+          upsert: true,
+        });
+      if (error) throw error;
+      const { data } = supabase.storage.from('audit-screenshots').getPublicUrl(path);
+      out.push({ label: page.label, url: data.publicUrl });
+    } catch (error) {
+      console.warn(`Screenshot upload failed (${page.label}):`, error);
+    }
+  }
+  return out;
+}
+
 export async function runAnalysisJob(testRunId: string): Promise<void> {
   const testRun = await getTestRun(testRunId);
   const site = (await getSiteById(testRun.site_id)) as Site;
@@ -72,6 +103,18 @@ export async function runAnalysisJob(testRunId: string): Promise<void> {
 
     const effectiveMetrics = metrics ?? emptyMetrics();
     const auditResult = await performAudit(site.url);
+    const screenshots = await uploadScreenshots(auditResult, site.id, testRunId);
+
+    const auditContext: AuditContext = {
+      failedChecks: auditResult.checklist_items.filter((c) => !c.passed),
+      pages: auditResult.pages.map(({ label, url, loadTimeMs, aboveFold }) => ({
+        label,
+        url,
+        loadTimeMs,
+        aboveFold,
+      })),
+    };
+
     const testPlanFull = await generateTestPlanFromMetrics({
       siteUrl: site.url,
       industry: site.industry ?? null,
@@ -81,11 +124,16 @@ export async function runAnalysisJob(testRunId: string): Promise<void> {
       sessions: effectiveMetrics.sessions,
       transactions: effectiveMetrics.transactions,
       deviceBreakdown: effectiveMetrics.device_breakdown,
+      auditContext,
     });
 
     const results: any = {
-      audit_result: auditResult,
+      audit_result: {
+        checklist_items: auditResult.checklist_items,
+        score_pct: auditResult.score_pct,
+      },
       test_plan: { tests: testPlanFull.tests, generated_at: new Date().toISOString() },
+      screenshots,
       metrics: metrics
         ? {
             conversion_rate: metrics.conversion_rate,
@@ -94,6 +142,19 @@ export async function runAnalysisJob(testRunId: string): Promise<void> {
           }
         : undefined,
     };
+
+    // Fix packs: the implementation-ready layer. Non-blocking on failure.
+    try {
+      results.fix_packs = await generateFixPacks({
+        siteUrl: site.url,
+        siteName: site.name,
+        industry: site.industry ?? null,
+        auditContext,
+        tests: testPlanFull.tests,
+      });
+    } catch (fixError) {
+      console.warn('Fix pack generation failed (non-critical):', fixError);
+    }
 
     // Run verification (non-blocking on error)
     try {
@@ -112,6 +173,7 @@ export async function runAnalysisJob(testRunId: string): Promise<void> {
       {
         'Audit Score': `${auditResult.score_pct}%`,
         'Tests Found': `${testPlanFull.tests.length}`,
+        'Fixes': `${results.fix_packs?.length ?? 0}`,
         'Conv. Rate': metrics ? `${metrics.conversion_rate}%` : 'no metrics source',
       }
     );
