@@ -1,4 +1,4 @@
-import { chromium, type Browser } from 'playwright-core';
+import type { Browser } from 'playwright-core';
 
 export interface AuditCheckItem {
   category: string;
