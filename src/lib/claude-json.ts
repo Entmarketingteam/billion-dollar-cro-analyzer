@@ -1,7 +1,13 @@
 // Shared Claude call that must return a JSON object. On a malformed first
 // response, retries once with the parse error fed back before giving up.
+//
+// Transport: prefers the ENT agent server (Railway, backed by the Claude Max
+// subscription — org rule: don't burn API credits) when AGENT_SERVER_* env
+// vars are set; falls back to the Anthropic API with ANTHROPIC_API_KEY.
 
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY || "";
+const AGENT_SERVER_URL = process.env.AGENT_SERVER_URL || "";
+const AGENT_SERVER_API_KEY = process.env.AGENT_SERVER_API_KEY || "";
 
 export const CLAUDE_MODEL = "claude-sonnet-5";
 
@@ -17,6 +23,39 @@ async function callClaude(
   messages: ClaudeMessage[],
   maxTokens: number
 ): Promise<string> {
+  if (AGENT_SERVER_URL && AGENT_SERVER_API_KEY) {
+    // Agent server takes a single prompt string; flatten the conversation.
+    const prompt = messages
+      .map((m) =>
+        m.role === "assistant" ? `Your previous response was:\n${m.content}` : m.content
+      )
+      .join("\n\n");
+
+    const response = await fetch(`${AGENT_SERVER_URL}/complete`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${AGENT_SERVER_API_KEY}`,
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({ prompt }),
+    });
+
+    if (!response.ok) {
+      const error = await response.text();
+      throw new ClaudeApiError(
+        `Agent server error: ${response.status} ${error.substring(0, 200)}`
+      );
+    }
+
+    const data = await response.json();
+    if (data.returncode !== 0) {
+      throw new ClaudeApiError(
+        `Agent server error: ${String(data.stderr).substring(0, 200)}`
+      );
+    }
+    return data.text || "";
+  }
+
   const response = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: {
