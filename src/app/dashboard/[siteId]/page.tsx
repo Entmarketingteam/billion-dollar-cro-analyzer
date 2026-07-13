@@ -167,6 +167,40 @@ export default function SiteResultsPage({ params }: { params: Promise<{ siteId: 
                     <AuditDisplay auditResult={selectedRun.results.audit_result} />
                     <TestPlanDisplay testPlan={selectedRun.results.test_plan} />
                   </div>
+
+                  {selectedRun.results.fix_packs && (
+                    <FixPackDisplay fixPacks={selectedRun.results.fix_packs} />
+                  )}
+
+                  {selectedRun.results.screenshots &&
+                    selectedRun.results.screenshots.length > 0 && (
+                      <div className="mt-8">
+                        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                          What the audit saw
+                        </h3>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                          {selectedRun.results.screenshots.map((shot) => (
+                            <a
+                              key={shot.label}
+                              href={shot.url}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="block border rounded-lg overflow-hidden hover:shadow-md transition-shadow"
+                            >
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img
+                                src={shot.url}
+                                alt={`${shot.label} screenshot`}
+                                className="w-full h-40 object-cover object-top"
+                              />
+                              <p className="text-xs text-gray-500 p-2 capitalize">
+                                {shot.label.replace('-', ' ')}
+                              </p>
+                            </a>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                 </>
               )}
 
