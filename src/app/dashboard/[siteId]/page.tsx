@@ -5,6 +5,7 @@ import type { TestRun } from '@/types';
 import StatusBadge from '@/components/StatusBadge';
 import AuditDisplay from '@/components/AuditDisplay';
 import TestPlanDisplay from '@/components/TestPlanDisplay';
+import FixPackDisplay from '@/components/FixPackDisplay';
 
 export default function SiteResultsPage({ params }: { params: Promise<{ siteId: string }> }) {
   const { siteId } = use(params);
