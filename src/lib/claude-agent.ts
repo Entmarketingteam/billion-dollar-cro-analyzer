@@ -1,5 +1,12 @@
-import type { TestPlanAnalysis } from "@/types";
+import type { TestPlanAnalysis, FixPack } from "@/types";
 import { claudeJson, CLAUDE_MODEL } from "./claude-json";
+import type { AuditCheckItem, PageFacts } from "./playwright-real";
+import frameworks from "./frameworks.json";
+
+export interface AuditContext {
+  failedChecks: AuditCheckItem[];
+  pages: Array<Pick<PageFacts, "label" | "url" | "loadTimeMs" | "aboveFold">>;
+}
 
 interface AnalysisInput {
   siteUrl: string;
@@ -10,6 +17,29 @@ interface AnalysisInput {
   sessions: number;
   transactions: number;
   deviceBreakdown: { desktop: number; mobile: number; tablet: number };
+  auditContext?: AuditContext;
+}
+
+function describeAudit(ctx: AuditContext): string {
+  const failures = ctx.failedChecks
+    .map((c) => `- [${c.page ?? "site"}] ${c.label}: ${c.details ?? "failed"}`)
+    .join("\n");
+
+  const layout = ctx.pages
+    .map(
+      (p) =>
+        `${p.label} (${p.url}, loaded in ${p.loadTimeMs}ms) — above-the-fold elements top to bottom:\n` +
+        p.aboveFold
+          .map((el) => `  ${el.y}px <${el.tag}> ${el.text}`)
+          .join("\n")
+    )
+    .join("\n\n");
+
+  return `Automated audit findings (checks that FAILED):
+${failures || "- none"}
+
+What a visitor actually sees above the fold on each page:
+${layout || "(no layout data)"}`;
 }
 
 // Industry benchmarks (simplified; in production, fetch from external source)
