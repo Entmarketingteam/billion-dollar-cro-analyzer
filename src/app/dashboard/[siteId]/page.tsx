@@ -17,10 +17,12 @@ export default function SiteResultsPage({ params }: { params: Promise<{ siteId: 
     const res = await fetch(`/api/test-run?siteId=${siteId}`);
     const data: TestRun[] = await res.json();
     setRuns(data);
-    // If a run is selected, update it in place from the fresh data
+    // If a run is selected, update it in place; otherwise select the newest
     if (selectedRun) {
       const updated = data.find((r) => r.id === selectedRun.id);
       if (updated) setSelectedRun(updated);
+    } else if (data.length > 0) {
+      setSelectedRun(data[0]);
     }
     setLoading(false);
   }
@@ -31,9 +33,9 @@ export default function SiteResultsPage({ params }: { params: Promise<{ siteId: 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedRun?.id]);
 
-  // Poll every 2s while selected run is running
+  // Poll every 2s while selected run is pending or running
   useEffect(() => {
-    if (selectedRun?.status !== 'running') return;
+    if (selectedRun?.status !== 'running' && selectedRun?.status !== 'pending') return;
     const interval = setInterval(fetchRuns, 2000);
     return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
