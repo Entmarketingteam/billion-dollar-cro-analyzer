@@ -105,6 +105,19 @@ export interface MetricsSnapshot {
   created_at: string;
 }
 
+// ── Fix packs (implementation-ready recommendations) ─────────
+
+export interface FixPack {
+  id: string;
+  finding: string;
+  impact: 'high' | 'medium' | 'low';
+  why: string;
+  steps: string[];
+  copy_example: string | null;
+  snippet: string | null;
+  shopify_apps: string[];
+}
+
 // ── Test run tracking ────────────────────────────────────────
 
 export type TestRunStatus = 'pending' | 'running' | 'completed' | 'error';
@@ -121,6 +134,8 @@ export interface TestRun {
     audit_result?: { checklist_items: Array<any>; score_pct: number };
     metrics?: { conversion_rate: number; aov: number; sessions: number };
     verification?: ResultVerification;
+    fix_packs?: FixPack[];
+    screenshots?: Array<{ label: string; url: string }>;
   } | null;
   created_at: string;
   updated_at: string;
