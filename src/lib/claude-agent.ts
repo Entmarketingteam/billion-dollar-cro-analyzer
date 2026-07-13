@@ -79,7 +79,13 @@ Current Performance:
 - Transactions: ${input.transactions}
 - Device Breakdown: Desktop ${input.deviceBreakdown.desktop}%, Mobile ${input.deviceBreakdown.mobile}%, Tablet ${input.deviceBreakdown.tablet}%
 
-Based on the "Billion Dollar Websites" framework by Joel Klettke, generate a prioritized test plan for this store.
+${input.auditContext ? describeAudit(input.auditContext) + "\n" : ""}
+Reference test catalog from the "Billion Dollar Websites" framework (adapt, don't copy blindly):
+${(frameworks.tests as Array<{ section: string; hypothesis: string }>)
+  .map((t) => `- ${t.section}: ${t.hypothesis}`)
+  .join("\n")}
+
+Based on the "Billion Dollar Websites" framework by Joel Klettke AND the audit findings above, generate a prioritized test plan for this store. Ground every test in something observed in the metrics, failed checks, or above-the-fold layout — cite the observation inside the hypothesis.
 
 Return ONLY a valid JSON object (no markdown, no explanation) with this exact structure:
 {
