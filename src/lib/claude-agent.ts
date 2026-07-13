@@ -149,3 +149,78 @@ Do not include any text outside the JSON object.`;
     throw error;
   }
 }
+
+// Turns audit findings into concrete, implementable fixes — copy, steps,
+// and (when apt) a code snippet — instead of just hypotheses.
+export async function generateFixPacks(input: {
+  siteUrl: string;
+  siteName: string;
+  industry: string | null;
+  auditContext: AuditContext;
+  tests: Array<{ section: string; hypothesis: string; priority_score: number }>;
+}): Promise<FixPack[]> {
+  const topTests = input.tests
+    .slice(0, 5)
+    .map((t) => `- (${t.priority_score}) ${t.section}: ${t.hypothesis}`)
+    .join("\n");
+
+  const prompt = `You are a senior CRO consultant delivering implementation-ready fixes for a Shopify store.
+
+Store: ${input.siteName} (${input.siteUrl})
+Industry: ${input.industry || "Unknown"}
+
+${describeAudit(input.auditContext)}
+
+Highest-priority test hypotheses already identified:
+${topTests}
+
+Produce the 4-6 highest-impact CONCRETE fixes. Every fix must be implementable by the store owner this week. Be specific to THIS store — reference the actual above-the-fold content and failed checks; never give generic advice that could apply to any store.
+
+Return ONLY a valid JSON object (no markdown, no explanation) with this exact structure:
+{
+  "fixes": [
+    {
+      "id": "unique_slug",
+      "finding": "what is wrong, citing the specific observation",
+      "impact": "high" | "medium" | "low",
+      "why": "the conversion mechanism this hurts, one or two sentences",
+      "steps": ["step 1", "step 2", ...],
+      "copy_example": "ready-to-paste headline/CTA/body copy in the store's voice, or null",
+      "snippet": "a short Liquid/HTML/CSS snippet if a code change is the fix, or null",
+      "shopify_apps": ["specific app name if an app is the fastest path, else empty array"]
+    }
+  ]
+}
+
+Rules:
+- steps are numbered, actionable, and name the exact Shopify admin screen or theme section to touch
+- copy_example must sound like this brand (look at the above-the-fold text for voice), not marketing boilerplate
+- order fixes by impact, highest first
+- if page load time exceeded 3000ms, one fix MUST address performance with specific culprits to check`;
+
+  const parsed = await claudeJson(prompt, 4096);
+
+  return (parsed.fixes || []).slice(0, 6).map(
+    (f: {
+      id?: string;
+      finding?: string;
+      impact?: string;
+      why?: string;
+      steps?: string[];
+      copy_example?: string | null;
+      snippet?: string | null;
+      shopify_apps?: string[];
+    }) => ({
+      id: f.id || crypto.randomUUID(),
+      finding: f.finding || "",
+      impact: (["high", "medium", "low"].includes(f.impact || "")
+        ? f.impact
+        : "medium") as FixPack["impact"],
+      why: f.why || "",
+      steps: Array.isArray(f.steps) ? f.steps : [],
+      copy_example: f.copy_example || null,
+      snippet: f.snippet || null,
+      shopify_apps: Array.isArray(f.shopify_apps) ? f.shopify_apps : [],
+    })
+  );
+}
